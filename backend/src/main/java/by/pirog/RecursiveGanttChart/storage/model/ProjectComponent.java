@@ -1,0 +1,39 @@
+package by.pirog.RecursiveGanttChart.storage.model;
+
+import by.pirog.RecursiveGanttChart.storage.enums.ReviewerTaskStatus;
+import by.pirog.RecursiveGanttChart.storage.enums.TaskStatus;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "project_components")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProjectComponent {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String title;
+    private String description;
+    private LocalDate deadline;
+    private TaskStatus status;
+    private ReviewerTaskStatus reviewerTaskStatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private Project project;
+
+    @OneToMany(mappedBy = "projectComponent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    //TODO private UserRole userMakesTask это как
+
+    //TODO надо с Task и Result что-то сделать
+}
