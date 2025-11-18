@@ -26,6 +26,9 @@ public class ProjectComponent {
     private TaskStatus status;
     private ReviewerTaskStatus reviewerTaskStatus;
 
+    private List<ProjectComponent> tasks = new ArrayList<>(); //TODO чекни
+
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
@@ -45,5 +48,4 @@ public class ProjectComponent {
 
     //TODO private UserRole userMakesTask это как
 
-    //TODO надо с Task и Result что-то сделать
 }
