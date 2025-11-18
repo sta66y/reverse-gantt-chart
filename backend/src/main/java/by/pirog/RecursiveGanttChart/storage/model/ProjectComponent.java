@@ -33,6 +33,16 @@ public class ProjectComponent {
     @OneToMany(mappedBy = "projectComponent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    public void addComment(Comment comment) {
+        comments.add(comment);
+        comment.setProjectComponent(this);
+    }
+
+    public void removeProjectComponent(Comment comment) {
+        comments.remove(comment);
+        comment.setProjectComponent(null);
+    }
+
     //TODO private UserRole userMakesTask это как
 
     //TODO надо с Task и Result что-то сделать

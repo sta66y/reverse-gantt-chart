@@ -32,4 +32,14 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectComponent> projectComponents = new ArrayList<>();
+
+    public void addProjectComponent(ProjectComponent projectComponent) {
+        projectComponents.add(projectComponent);
+        projectComponent.setProject(this);
+    }
+
+    public void removeProjectComponent(ProjectComponent projectComponent) {
+        projectComponents.remove(projectComponent);
+        projectComponent.setProject(null);
+    }
 }
