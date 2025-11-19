@@ -1,0 +1,357 @@
+/* pages/Project/components/GanttChart/GanttChart.module.css */
+.ganttChart {
+  font-family: Arial, sans-serif;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+/* ТОЛЬКО заголовок фиксированный */
+.fixedHeader {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.taskHeader {
+  padding: 15px;
+  font-weight: bold;
+  background: #e9ecef;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* ОСНОВНОЙ СКРОЛЛ КОНТЕЙНЕР */
+.scrollContainer {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+/* ХОЛСТ - всё что скроллится */
+.canvas {
+  position: relative;
+  min-height: 100%;
+  background: white;
+}
+
+/* Строка с датами - ЧАСТЬ ХОЛСТА */
+.datesRow {
+  display: flex;
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  position: sticky;
+  top: 0;
+  z-index: 15;
+  height: 50px;
+}
+
+.datesSpacer {
+  background: #e9ecef;
+  border-right: 2px solid #dee2e6;
+  flex-shrink: 0;
+  height: 100%;
+}
+
+.datesContainer {
+  display: flex;
+  background: white;
+  height: 100%;
+}
+
+.dateCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid #e9ecef;
+  font-size: 11px;
+  background: white;
+  flex-shrink: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.dateCell.weekend {
+  background: #f8f9fa;
+}
+
+.dateCell.firstOfMonth {
+  background: #e3f2fd;
+  border-left: 2px solid #007bff;
+}
+
+.dayNumber {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.monthName {
+  color: #007bff;
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Сетка - ТОЧНО под датами */
+.grid {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.gridLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #f1f3f4;
+  border-right: 1px solid #f1f3f4;
+  box-sizing: border-box;
+}
+
+/* Контейнер задач */
+.tasksContainer {
+  position: relative;
+  z-index: 5;
+}
+
+/* Обертка строки задачи */
+.taskRowWrapper {
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.taskRow {
+  display: flex;
+  min-height: 50px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.taskRow:hover {
+  background: #f8f9fa;
+}
+
+.taskRow.selected {
+  background: #e3f2fd;
+}
+
+/* Левая панель с информацией */
+.taskInfo {
+  background: white;
+  border-right: 2px solid #dee2e6;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+.taskInfoContent {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 15px;
+  gap: 10px;
+}
+
+.expandButton {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #007bff;
+  background: white;
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #007bff;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.expandButton:hover:not(:disabled) {
+  background: #007bff;
+  color: white;
+}
+
+.expandButton:disabled {
+  border-color: #6c757d;
+  color: #6c757d;
+  background: #f8f9fa;
+}
+
+.taskTitle {
+  flex: 1;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.taskActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.taskRow:hover .taskActions {
+  opacity: 1;
+}
+
+.taskActions button {
+  border: none;
+  background: #6c757d;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.taskActions button:hover {
+  background: #545b62;
+  transform: scale(1.1);
+}
+
+/* Правая панель с задачами */
+.timelineArea {
+  flex: 1;
+  position: relative;
+  min-height: 50px;
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 39px,
+      #fafafa 39px,
+      #fafafa 40px
+    );
+}
+
+/* Бар задачи */
+.taskBar {
+  position: absolute;
+  height: 30px;
+  background: #e9ecef;
+  border-radius: 6px;
+  top: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  min-width: 40px;
+  box-sizing: border-box;
+}
+
+/* Разные стили для разных уровней вложенности */
+.taskBar[data-level="0"] {
+  height: 35px;
+  border-left: 4px solid #007bff;
+}
+
+.taskBar[data-level="1"] {
+  height: 30px;
+  border-left: 3px solid #28a745;
+  top: 12px;
+}
+
+.taskBar[data-level="2"] {
+  height: 25px;
+  border-left: 2px solid #ffc107;
+  top: 14px;
+}
+
+.taskBar[data-level="3"] {
+  height: 22px;
+  border-left: 1px solid #dc3545;
+  top: 16px;
+}
+
+.taskBar[data-priority="high"] {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+}
+
+.taskBar[data-priority="medium"] {
+  background: linear-gradient(135deg, #ffd93d, #ffeaa7);
+}
+
+.taskBar[data-priority="low"] {
+  background: linear-gradient(135deg, #6bcf7f, #a8e6a3);
+}
+
+.taskBar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.progress {
+  height: 100%;
+  background: rgba(255,255,255,0.4);
+  transition: width 0.3s;
+  border-radius: 4px;
+}
+
+.taskLabel {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #333;
+  font-weight: 500;
+  text-shadow: 0 1px 1px rgba(255,255,255,0.8);
+}
+
+/* Дочерние задачи */
+.children {
+  background: #fafbfc;
+}
+
+.children .taskInfo {
+  background: #fafbfc;
+}
+
+/* Пустое состояние */
+.emptyState {
+  padding: 60px 20px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 16px;
+  background: white;
+}
+
+/* Скроллбар */
+.scrollContainer::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 6px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

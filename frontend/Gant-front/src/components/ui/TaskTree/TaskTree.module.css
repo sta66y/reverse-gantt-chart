@@ -1,0 +1,185 @@
+/* pages/Project/components/TaskTree/TaskTree.module.css */
+.taskTree {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  background: #f8f9fa;
+  padding: 15px 20px;
+  border-bottom: 1px solid #dee2e6;
+  font-weight: bold;
+  color: #495057;
+}
+
+.headerTitle {
+  flex: 2;
+}
+
+.headerMeta {
+  flex: 1;
+}
+
+.headerActions {
+  width: 120px;
+  text-align: center;
+}
+
+.treeContent {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.taskNode {
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  transition: background-color 0.2s;
+  min-height: 50px;
+}
+
+.taskItem:hover {
+  background: #f8f9fa;
+}
+
+.expandButton {
+  width: 24px;
+  height: 24px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 3px;
+  margin-right: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.expandButton:hover:not(:disabled) {
+  border-color: #007bff;
+  color: #007bff;
+}
+
+.expandButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.taskContent {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 15px;
+}
+
+.taskTitle {
+  flex: 2;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s;
+}
+
+.taskTitle:hover {
+  color: #007bff;
+}
+
+.taskMeta {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.priority {
+  font-size: 14px;
+}
+
+.priority.high {
+  color: #dc3545;
+}
+
+.priority.medium {
+  color: #ffc107;
+}
+
+.priority.low {
+  color: #28a745;
+}
+
+.progress {
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.dates {
+  font-size: 11px;
+}
+
+.taskActions {
+  display: flex;
+  gap: 5px;
+  width: 120px;
+  justify-content: center;
+}
+
+.actionButton {
+  border: none;
+  background: #6c757d;
+  color: white;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: #545b62;
+  transform: scale(1.05);
+}
+
+.actionButton:disabled {
+  background: #adb5bd;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.children {
+  background: #fafbfc;
+  border-left: 2px solid #e9ecef;
+  margin-left: 20px;
+}
+
+/* Анимация раскрытия */
+.taskNode {
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
