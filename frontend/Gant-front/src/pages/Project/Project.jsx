@@ -171,8 +171,8 @@ const generateMockTasks = () => [
     description: 'Основная задача проекта',
     startDate: '2024-01-01',
     endDate: '2024-01-31',
-    progress: 30,
-    priority: 'high',
+    status: 'In process',
+    reviewerStatus: 'None',
     children: [
       {
         id: '2',
@@ -180,8 +180,8 @@ const generateMockTasks = () => [
         description: 'Создание технического задания',
         startDate: '2024-01-01',
         endDate: '2024-01-07',
-        progress: 100,
-        priority: 'high',
+        status: 'Planned',
+        reviewerStatus: 'Accepted',
         children: [
           {
             id: '3',
@@ -189,57 +189,28 @@ const generateMockTasks = () => [
             description: 'Сбор и анализ требований заказчика',
             startDate: '2024-01-01',
             endDate: '2024-01-03',
-            progress: 100,
-            priority: 'medium'
-          },
-          {
-            id: '4',
-            title: 'Создание ТЗ',
-            description: 'Разработка технического задания',
-            startDate: '2024-01-04',
-            endDate: '2024-01-07',
-            progress: 100,
-            priority: 'medium'
+            status: 'Completed',
+            reviewerStatus: 'Accepted'
           }
         ]
       },
       {
-        id: '5',
+        id: '4',
         title: 'Фронтенд разработка',
         description: 'Разработка пользовательского интерфейса',
         startDate: '2024-01-08',
         endDate: '2024-01-20',
-        progress: 60,
-        priority: 'medium',
-        children: [
-          {
-            id: '6',
-            title: 'Верстка компонентов',
-            description: 'Создание UI компонентов',
-            startDate: '2024-01-08',
-            endDate: '2024-01-12',
-            progress: 100,
-            priority: 'low'
-          },
-          {
-            id: '7',
-            title: 'Интеграция с API',
-            description: 'Подключение к бэкенду',
-            startDate: '2024-01-13',
-            endDate: '2024-01-20',
-            progress: 30,
-            priority: 'medium'
-          }
-        ]
+        status: 'In process',
+        reviewerStatus: 'None'
       },
       {
-        id: '8',
-        title: 'Тестирование',
-        description: 'Функциональное и интеграционное тестирование',
-        startDate: '2024-01-21',
-        endDate: '2024-01-31',
-        progress: 0,
-        priority: 'low'
+        id: '5',
+        title: 'Задача с проблемами',
+        description: 'Задача требующая внимания',
+        startDate: '2024-01-10',
+        endDate: '2024-01-15',
+        status: 'Delayed',
+        reviewerStatus: 'Rejected'
       }
     ]
   }

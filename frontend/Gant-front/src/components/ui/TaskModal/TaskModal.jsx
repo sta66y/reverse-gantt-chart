@@ -8,11 +8,29 @@ const TaskModal = ({ task, onSave, onClose }) => {
     description: '',
     startDate: '',
     endDate: '',
-    progress: 0,
-    priority: 'medium'
+    status: 'Planned',
+    reviewerStatus: 'None'
   });
   const [errors, setErrors] = useState({});
 
+  // Ключевое исправление: используем отдельный стейт для отслеживания инициализации
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    if (task && !isInitialized) {
+      setFormData({
+        title: task.title || '',
+        description: task.description || '',
+        startDate: task.startDate || '',
+        endDate: task.endDate || '',
+        status: task.status || 'Planned',
+        reviewerStatus: task.reviewerStatus || 'None'
+      });
+      setIsInitialized(true);
+    }
+  }, [task, isInitialized]);
+
+  // Альтернативное решение: сбрасываем инициализацию когда task меняется
   useEffect(() => {
     if (task) {
       setFormData({
@@ -20,11 +38,21 @@ const TaskModal = ({ task, onSave, onClose }) => {
         description: task.description || '',
         startDate: task.startDate || '',
         endDate: task.endDate || '',
-        progress: task.progress || 0,
-        priority: task.priority || 'medium'
+        status: task.status || 'Planned',
+        reviewerStatus: task.reviewerStatus || 'None'
+      });
+    } else {
+      // Сброс формы для новой задачи
+      setFormData({
+        title: '',
+        description: '',
+        startDate: '',
+        endDate: '',
+        status: 'Planned',
+        reviewerStatus: 'None'
       });
     }
-  }, [task]);
+  }, [task]); // ← Зависимость от task
 
   const validateForm = () => {
     const newErrors = {};
@@ -94,7 +122,9 @@ const TaskModal = ({ task, onSave, onClose }) => {
               value={formData.title}
               onChange={handleChange}
               required
+              className={errors.title ? styles.error : ''}
             />
+            {errors.title && <span className={styles.errorText}>{errors.title}</span>}
           </div>
 
           <div className={styles.formGroup}>
@@ -137,28 +167,29 @@ const TaskModal = ({ task, onSave, onClose }) => {
 
           <div className={styles.row}>
             <div className={styles.formGroup}>
-              <label>Прогресс (%):</label>
-              <input
-                type="range"
-                name="progress"
-                min="0"
-                max="100"
-                value={formData.progress}
+              <label>Статус задачи:</label>
+              <select
+                name="status"
+                value={formData.status}
                 onChange={handleChange}
-              />
-              <span>{formData.progress}%</span>
+              >
+                <option value="Planned">Запланирована</option>
+                <option value="In process">В процессе</option>
+                <option value="Completed">Завершена</option>
+                <option value="Delayed">Отложена</option>
+              </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label>Приоритет:</label>
+              <label>Статус проверки:</label>
               <select
-                name="priority"
-                value={formData.priority}
+                name="reviewerStatus"
+                value={formData.reviewerStatus}
                 onChange={handleChange}
               >
-                <option value="low">Низкий</option>
-                <option value="medium">Средний</option>
-                <option value="high">Высокий</option>
+                <option value="None">Не проверялась</option>
+                <option value="Accepted">Принята</option>
+                <option value="Rejected">Отклонена</option>
               </select>
             </div>
           </div>

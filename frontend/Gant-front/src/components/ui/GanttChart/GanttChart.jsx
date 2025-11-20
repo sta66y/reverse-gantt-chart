@@ -118,6 +118,13 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
                 {hasChildren ? (isExpanded ? '−' : '+') : '•'}
               </button>
               
+              {/* Кругляшок статуса проверки */}
+              <div 
+                className={styles.reviewerStatus}
+                data-status={task.reviewerStatus}
+                title={getReviewerStatusTitle(task.reviewerStatus)}
+              />
+              
               <span 
                 className={styles.taskTitle}
                 style={{ paddingLeft: `${level * 12}px` }}
@@ -150,15 +157,11 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
                 left: `${taskLeft}px`,
                 width: `${taskWidth}px`
               }}
-              data-priority={task.priority}
+              data-status={task.status}
               data-level={level}
             >
-              <div 
-                className={styles.progress}
-                style={{ width: `${task.progress}%` }}
-              />
               <span className={styles.taskLabel}>
-                {task.progress}%
+                {getStatusText(task.status)}
               </span>
             </div>
           </div>
@@ -227,6 +230,26 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
       </div>
     </div>
   );
+};
+
+// Вспомогательные функции для статусов
+const getStatusText = (status) => {
+  const statusMap = {
+    'Planned': 'Запланировано',
+    'In process': 'В процессе',
+    'Completed': 'Завершено',
+    'Delayed': 'Отложено'
+  };
+  return statusMap[status] || status;
+};
+
+const getReviewerStatusTitle = (reviewerStatus) => {
+  const titleMap = {
+    'None': 'Не проверялась',
+    'Accepted': 'Принята проверяющим',
+    'Rejected': 'Отклонена проверяющим'
+  };
+  return titleMap[reviewerStatus] || reviewerStatus;
 };
 
 // Вспомогательные функции (остаются те же)
