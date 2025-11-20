@@ -1,5 +1,6 @@
 package by.pirog.RecursiveGanttChart.storage.model;
 
+import by.pirog.RecursiveGanttChart.storage.enums.UserRoles;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,24 +9,29 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "user_roles")
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "role_type")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public abstract class UserRole {
+@AllArgsConstructor
+public class UserRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
-    protected Project project;
+    private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    protected User user;
+    private User user;
 
-    public void leaveProject() {}; //TODO
+    @Enumerated(EnumType.STRING)
+    private UserRoles roleType;
+
+    public UserRole(User user, Project project, UserRoles roleType) {
+        this.user = user;
+        this.project = project;
+        this.roleType = roleType;
+    }
 }
