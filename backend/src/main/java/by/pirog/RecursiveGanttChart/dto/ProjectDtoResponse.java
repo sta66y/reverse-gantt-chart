@@ -9,8 +9,7 @@ public record ProjectDtoResponse(
     String description,
     LocalDate deadline,
 
-    String creatorName,
-    String subjectName,
+    String creatorEmail,
 
     List<ProjectComponentDtoResponse> tasks
 ) { }
