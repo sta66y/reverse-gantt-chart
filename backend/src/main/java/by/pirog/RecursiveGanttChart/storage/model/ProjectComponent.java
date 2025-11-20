@@ -23,29 +23,64 @@ public class ProjectComponent {
     private String title;
     private String description;
     private LocalDate deadline;
-    private TaskStatus status;
-    private ReviewerTaskStatus reviewerTaskStatus;
 
-    private List<ProjectComponent> tasks = new ArrayList<>(); //TODO чекни
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status = TaskStatus.PLANNED;
 
+    @Enumerated(EnumType.STRING)
+    private ReviewerTaskStatus reviewerTaskStatus = ReviewerTaskStatus.NONE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private ProjectComponent parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProjectComponent> tasks = new ArrayList<>();
+
     @OneToMany(mappedBy = "projectComponent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "task_assignees",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<User> assignees = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_id")
+    private User creator;
+
+    public void addTask(ProjectComponent task) {
+        tasks.add(task);
+        task.setParent(this);
+    }
+
+    public void removeTask(ProjectComponent task) {
+        tasks.remove(task);
+        task.setParent(null);
+    }
 
     public void addComment(Comment comment) {
         comments.add(comment);
         comment.setProjectComponent(this);
     }
 
-    public void removeProjectComponent(Comment comment) {
+    public void removeComment(Comment comment) {
         comments.remove(comment);
         comment.setProjectComponent(null);
     }
 
-    //TODO private UserRole userMakesTask это как
+    public void addAssignee(User user) {
+        assignees.add(user);
+    }
 
+    public void removeAssignee(User user) {
+        assignees.remove(user);
+    }
 }
