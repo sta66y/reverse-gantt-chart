@@ -10,6 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "projects")
 @Getter
+@Builder
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,9 +27,9 @@ public class Project {
     @JoinColumn(name = "creator_user_id")
     private User creator;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id")
-    private Subject subject;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "subject_id")
+//    private Subject subject;  TODO
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectComponent> projectComponents = new ArrayList<>();
