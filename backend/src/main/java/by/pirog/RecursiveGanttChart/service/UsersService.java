@@ -48,7 +48,7 @@ public class UsersService {
         Project project = projectsRepository.findById(projectId)
                 .orElseThrow(() -> new ProjectNotFound("Project not found with id: " + projectId));
 
-        User targetUser = getUserById(userId);
+        User targetUser = getUserById(userId); //TODO проверить что юзер есть
 
         // Проверяем, что текущий пользователь имеет права администратора
         if (!hasAdminAccess(currentUser, project)) {

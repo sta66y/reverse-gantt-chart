@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UsersController {
 
@@ -25,6 +25,7 @@ public class UsersController {
             @AuthenticationPrincipal User currentUser) {
         userService.assignRoleToUser(projectId, userId, role, currentUser);
     }
+    //TODO создать юзер
 
     @GetMapping("/projects/{projectId}/users")
     public List<UserDto> getProjectUsers(

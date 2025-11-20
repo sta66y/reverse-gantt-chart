@@ -33,7 +33,7 @@ public class ProjectsController {
     public ProjectDtoResponse getProjectById(
             @PathVariable Integer id,
             @AuthenticationPrincipal User currentUser) {
-        return projectsService.getProjectById(id);
+        return projectsService.getProjectById(id); //TODO
     }
 
     @PatchMapping("/{id}")
