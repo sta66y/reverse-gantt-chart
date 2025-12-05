@@ -15,7 +15,7 @@ const NotFound = () => {
           </p>
           <div className={styles.actions}>
             <Link to="/" className={styles.homeButton}>
-              Вернуться на главную
+              Вернуться на главную 
             </Link>
             <Link to="/projects" className={styles.projectsButton}>
               Перейти к проектам

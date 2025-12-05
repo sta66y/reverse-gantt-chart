@@ -133,6 +133,11 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
               </span>
               
               <div className={styles.taskActions}>
+                <div 
+            className={styles.commentButton}
+          >
+            💬 {task.comments?.length || 0}
+          </div>
                 <button onClick={(e) => {
                   e.stopPropagation();
                   onAddSubtask(task.id);

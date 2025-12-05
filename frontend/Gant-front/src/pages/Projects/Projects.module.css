@@ -124,3 +124,236 @@
     padding: 0 10px;
   }
 }
+
+
+/* Модальное окно создания проекта */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modalHeader h2 {
+  color: white;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modalBody {
+  margin-bottom: 1.5rem;
+}
+
+.apiError {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: white;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.formGroup input::placeholder,
+.formGroup textarea::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.inputError {
+  border-color: #ff6b6b !important;
+  background: rgba(255, 107, 107, 0.1) !important;
+}
+
+.errorText {
+  color: #ff6b6b;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  display: block;
+}
+
+.modalFooter {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.cancelButton {
+  padding: 0.8rem 1.5rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  min-width: 100px;
+}
+
+.cancelButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.createButton {
+  padding: 0.8rem 1.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 140px;
+  backdrop-filter: blur(10px);
+}
+
+.createButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.createButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.errorMessage {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 1rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+/* Адаптивность модального окна */
+@media (max-width: 768px) {
+  .modal {
+    padding: 1.5rem;
+    margin: 1rem;
+  }
+  
+  .modalHeader h2 {
+    font-size: 1.3rem;
+  }
+  
+  .modalFooter {
+    flex-direction: column;
+  }
+  
+  .cancelButton,
+  .createButton {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: 1.2rem;
+  }
+  
+  .modalHeader h2 {
+    font-size: 1.2rem;
+  }
+  
+  .formGroup input,
+  .formGroup textarea {
+    padding: 0.7rem 0.9rem;
+  }
+}

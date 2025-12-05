@@ -6,6 +6,8 @@ import Button from '../../components/ui/Button';
 import Header from '../../components/ui/Header/Header';
 
 const Auth = () => {
+
+  const apiAddress = import.meta.env.VITE_API_ADDRESS
   // Состояние для переключения между входом и регистрацией
   const [isLogin, setIsLogin] = useState(true);
   
@@ -64,32 +66,37 @@ const Auth = () => {
       console.log('Отправляем данные:', formData);
       
       // Имитация запроса к API (задержка 1 секунда)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Имитация ответа от сервера
       // В реальном приложении здесь будет:
-      // const response = await fetch('/api/auth/' + (isLogin ? 'login' : 'register'), {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData)
-      // });
-      // const data = await response.json();
+
+      if(!isLogin) {
+        const response = await fetch(apiAddress + 'auth/register', {
+          method: 'POST',
+          credentials: 'include',  // ← ВАЖНО!
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        if(!response.ok) throw new Error("Ошибка на стороне регистрации: " + response.message)
+      }
+
+      const response = await fetch(apiAddress + 'auth/login', {
+        method: 'POST',
+        credentials: 'include',  // ← ВАЖНО!
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
       
-      // Имитация успешного ответа
-      const mockResponse = {
-        success: true,
-        token: 'fake-jwt-token',
-        user: { id: 1, email: formData.email }
-      };
+      console.log(response)
       
-      if (mockResponse.success) {
-        // Сохраняем токен в localStorage
-        localStorage.setItem('token', mockResponse.token);
-        localStorage.setItem('user', JSON.stringify(mockResponse.user));
-        
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data)
         // Переходим на страницу проектов
         navigate('/projects');
-      } else {
+      }
+      else  {
         // Имитация ошибки от сервера
         throw new Error('Неверный email или пароль');
       }

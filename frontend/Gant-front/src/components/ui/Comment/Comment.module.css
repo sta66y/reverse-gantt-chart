@@ -1,0 +1,51 @@
+.comment {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.userEmail {
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.userRole {
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+.commentDate {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.75rem;
+  font-weight: 300;
+}
+
+.commentText {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-line; /* Сохраняем переносы строк */
+}

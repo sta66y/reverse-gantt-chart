@@ -443,3 +443,23 @@
   text-overflow: ellipsis;
   max-width: calc(100% - 16px);
 }
+
+
+
+/* Добавляем стиль для кнопки комментариев */
+.commentButton {
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  color: #667eea;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-right: 5px;
+  transition: all 0.3s ease;
+}
+
+.commentButton:hover {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: rgba(102, 126, 234, 0.5);
+}

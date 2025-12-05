@@ -11,11 +11,22 @@ const Project = () => {
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('gantt'); // 'gantt' или 'tree'
+  const [viewMode, setViewMode] = useState('gantt'); // 'gantt', 'tree', 'users'
+
+  // Тестовые данные пользователей проекта
+  const projectUsers = [
+    { id: 1, email: 'project.manager@company.com', role: 'Менеджер' },
+    { id: 2, email: 'frontend.dev@company.com', role: 'Разработчик' },
+    { id: 3, email: 'backend.dev@company.com', role: 'Разработчик' },
+    { id: 4, email: 'designer.anna@company.com', role: 'Дизайнер' },
+    { id: 5, email: 'analyst.maria@company.com', role: 'Аналитик' },
+    { id: 6, email: 'qa.sergey@company.com', role: 'Тестировщик' },
+    { id: 7, email: 'stakeholder@company.com', role: 'Владелец' },
+    { id: 8, email: 'devops@company.com', role: 'Разработчик' },
+  ];
 
   // Загрузка данных проекта
   useEffect(() => {
-    // TODO: Заменить на реальный API вызов
     const mockTasks = generateMockTasks();
     setTasks(mockTasks);
   }, [projectId]);
@@ -95,6 +106,30 @@ const Project = () => {
     });
   };
 
+  // Функция для получения цвета роли
+  const getRoleColor = (role) => {
+    const roleColors = {
+      'Менеджер': '#ff6b6b',
+      'Разработчик': '#4ecdc4',
+      'Дизайнер': '#45b7d1',
+      'Аналитик': '#96ceb4',
+      'Тестировщик': '#feca57',
+      'Владелец': '#ee5a24'
+    };
+    return roleColors[role] || '#667eea';
+  };
+
+  // Функция для подсчета пользователей по ролям
+  const getRoleStats = () => {
+    const stats = {};
+    projectUsers.forEach(user => {
+      stats[user.role] = (stats[user.role] || 0) + 1;
+    });
+    return stats;
+  };
+
+  const roleStats = getRoleStats();
+
   return (
     <div className={styles.project}>
       <header className={styles.header}>
@@ -119,6 +154,12 @@ const Project = () => {
             >
               Дерево задач
             </button>
+            <button 
+              className={viewMode === 'users' ? styles.active : ''}
+              onClick={() => setViewMode('users')}
+            >
+              Участники
+            </button>
           </div>
         </div>
       </header>
@@ -135,7 +176,7 @@ const Project = () => {
             onAddSubtask={handleAddTask}
             onDeleteTask={handleDeleteTask}
           />
-        ) : (
+        ) : viewMode === 'tree' ? (
           <TaskTree 
             tasks={tasks}
             onTaskSelect={setSelectedTask}
@@ -146,6 +187,58 @@ const Project = () => {
             onAddSubtask={handleAddTask}
             onDeleteTask={handleDeleteTask}
           />
+        ) : (
+          <div className={styles.usersView}>
+            <div className={styles.statsSection}>
+              <h3>Статистика по ролям</h3>
+              <div className={styles.statsGrid}>
+                {Object.entries(roleStats).map(([role, count]) => (
+                  <div key={role} className={styles.statCard}>
+                    <div 
+                      className={styles.statColor}
+                      style={{ backgroundColor: getRoleColor(role) }}
+                    />
+                    <div className={styles.statInfo}>
+                      <span className={styles.statRole}>{role}</span>
+                      <span className={styles.statCount}>{count} чел.</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.usersList}>
+              <h3>Все участники проекта</h3>
+              <div className={styles.usersTable}>
+                <div className={styles.tableHeader}>
+                  <div className={styles.tableCell}>Email</div>
+                  <div className={styles.tableCell}>Роль</div>
+                  <div className={styles.tableCell}>Действия</div>
+                </div>
+                {projectUsers.map(user => (
+                  <div key={user.id} className={styles.tableRow}>
+                    <div className={styles.tableCell}>
+                      <span className={styles.userEmail}>{user.email}</span>
+                    </div>
+                    <div className={styles.tableCell}>
+                      <span 
+                        className={styles.userRole}
+                        style={{ backgroundColor: getRoleColor(user.role) }}
+                      >
+                        {user.role}
+                      </span>
+                    </div>
+                    <div className={styles.tableCell}>
+                      <div className={styles.userActions}>
+                        <button className={styles.actionButton}>Написать</button>
+                        <button className={styles.actionButton}>Профиль</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
       </main>
 

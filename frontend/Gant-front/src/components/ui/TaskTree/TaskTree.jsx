@@ -58,6 +58,11 @@ const TaskTree = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask 
             </div>
 
             <div className={styles.taskActions}>
+              <div 
+              className={styles.commentButton}
+            >
+              💬 {task.comments?.length || 0}
+            </div>
               <button 
                 className={styles.actionButton}
                 onClick={() => onAddSubtask(task.id)}

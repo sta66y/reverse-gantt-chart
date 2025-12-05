@@ -1,7 +1,10 @@
 import styles from './ProjectCard.module.css';
 
-const ProjectCard = ({ project }) => {
+const ProjectCard = ({ project, onFollowProject}) => {
   const formatDate = (dateString) => {
+
+    if(!dateString) return null;
+
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: 'numeric',
       month: 'long',
@@ -26,29 +29,38 @@ const ProjectCard = ({ project }) => {
 
   const getRoleColor = (role) => {
     const roleColors = {
-      'Менеджер': '#ff6b6b',
-      'Разработчик': '#4ecdc4',
-      'Дизайнер': '#45b7d1',
-      'Аналитик': '#96ceb4',
-      'Тестировщик': '#feca57',
-      'Владелец': '#ee5a24'
+      'ROLE_ADMIN': '#ff6b6b',
+      'ROLE_PLANNER': '#4ecdc4',
+      'ROLE_REVIEWER': '#45b7d1',
+      'ROLE_STUDENT': '#96ceb4',
+      'ROLE_VIEWER': '#feca57'
     };
     return roleColors[role] || '#667eea';
   };
+  const getRoleString = (role) => {
+    const roleStrings = {
+      'ROLE_ADMIN': 'Админ',
+      'ROLE_PLANNER': 'Планнер',
+      'ROLE_REVIEWER': 'Ревьюер',
+      'ROLE_STUDENT': 'Студент',
+      'ROLE_VIEWER': 'Гость'
+    };
+    return roleStrings[role] || "Неизвестный";
+  }
 
   const deadlineStatus = getDeadlineStatus(project.deadline);
 
   return (
-    <div className={styles.card}>
-      <h3 className={styles.title}>{project.name}</h3>
-      <p className={styles.description}>{project.description}</p>
+    <div className={styles.card} onClick={onFollowProject}>
+      <h3 className={styles.title}>{project.projectName}</h3>
+      <p className={styles.description}>{project.projectDescription}</p>
       
       <div className={styles.role}>
         <span 
           className={styles.roleBadge}
           style={{ backgroundColor: getRoleColor(project.role) }}
         >
-          {project.role}
+          {getRoleString(project.role)}
         </span>
       </div>
       

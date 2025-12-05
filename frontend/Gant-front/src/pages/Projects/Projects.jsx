@@ -1,80 +1,169 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import styles from './Projects.module.css';
 import Header from '../../components/ui/Header';
 import Button from '../../components/ui/Button';
 import ProjectCard from '../../components/ui/ProjectCard';
 
 const Projects = () => {
+  const apiAddress = import.meta.env.VITE_API_ADDRESS;
+  const [error, setError] = useState('');
+  const [projects, setProjects] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newProjectData, setNewProjectData] = useState({
+    name: '',
+    description: '',
+    deadline: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [modalErrors, setModalErrors] = useState({});
+
   const navigate = useNavigate();
 
-  // Тестовые данные с ролями
-  const projects = [
-    {
-      id: 1,
-      name: 'Разработка мобильного приложения',
-      description: 'Создание кроссплатформенного приложения для управления задачами с синхронизацией в реальном времениasdlkjf;kdjkfjdjkfkdjfdfdfasjlksl;dlksdjfla;ksdjf;lksjdlf;sdalkj;fslkdjfl;kdjsl;akj;sldjflkjds;l asdlkj f;lkasdj ;lkfj; skdj;l fjlskdj a;lkfj lskdj ;lkjf ;lkasj;d jfldkj kl;fjs;dlk jflkjs ;ld flk',
-      role: 'Менеджер',
-      deadline: '2025-12-15'
-    },
-    {
-      id: 2,
-      name: 'Ребрендинг компании',
-      description: 'Полное обновление визуального стиля и айдентики бренда для выхода на новые рынки',
-      role: 'Дизайнер',
-      deadline: '2025-11-19'
-    },
-    {
-      id: 3,
-      name: 'Внедрение CRM системы',
-      description: 'Интеграция и настройка CRM для автоматизации процессов продаж и улучшения клиентского сервиса',
-      role: 'Аналитик',
-      deadline: '2025-10-25'
-    },
-    {
-      id: 4,
-      name: 'Запуск интернет-магазина',
-      description: 'Разработка и запуск полнофункциональной платформы электронной коммерции с системой оплаты',
-      role: 'Разработчик',
-      deadline: '2025-12-05'
-    },
-    {
-      id: 5,
-      name: 'Оптимизация бизнес-процессов',
-      description: 'Анализ и реинжиниринг ключевых бизнес-процессов для повышения эффективности работы',
-      role: 'Аналитик',
-      deadline: '2025-10-20'
-    },
-    {
-      id: 6,
-      name: 'Разработка корпоративного портала',
-      description: 'Создание единой информационной системы для сотрудников с модулями документооборота и коммуникации',
-      role: 'Владелец',
-      deadline: '2025-11-15'
-    },
-    {
-      id: 7,
-      name: 'Тестирование новой платформы',
-      description: 'Комплексное тестирование функциональности и производительности новой программной платформы',
-      role: 'Тестировщик',
-      deadline: '2024-10-18'
-    },
-    {
-      id: 8,
-      name: 'Миграция баз данных',
-      description: 'Перенос данных со старой системы на новую платформу с минимальным временем простоя',
-      role: 'Разработчик',
-      deadline: '2024-11-28'
-    }
-  ];
+  useEffect(() => {
+    getProjectMemberships();
+  }, []);
 
-  const handleLogout = () => {
-    // TODO: Реализовать выход
-    navigate('/');
+  const getProjectMemberships = async () => {
+    try {
+      const response = await fetch(apiAddress + 'membership', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        const formattedProjects = data.map(item => ({
+          projectId: item.projectId || item.id,
+          projectName: item.projectName || item.name,
+          projectDescription: item.projectDescription || item.description,
+          role: item.role || item.userRole,
+          deadline: item.deadline || item.endDate
+        }));
+        
+        setProjects(formattedProjects);
+        setError('');
+      } else {
+        setError("Не удалось получить проекты");
+      }
+    } catch (err) {
+      setError("Ошибка соединения");
+      console.error(err);
+    }
   };
 
-  const handleCreateProject = () => {
-    // TODO: Реализовать создание проекта
-    console.log('Создание нового проекта');
+  const handleLoginIntoProject = async (projectId) => {
+    const response = await fetch(apiAddress + 'LoginIntoProject/' + projectId, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    if (response.ok) {
+      navigate('/project/' + projectId);
+    } else {
+      setError("Не удалось зайти в проект: " + (await response.json()).message);
+    }
+  };
+
+  const handleCreateProjectClick = () => {
+    setIsModalOpen(true);
+    setModalErrors({});
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setNewProjectData({ name: '', description: '', deadline: '' });
+    setModalErrors({});
+  };
+
+  const validateProjectForm = () => {
+    const errors = {};
+    
+    if (!newProjectData.name.trim()) {
+      errors.name = 'Название обязательно';
+    }
+    
+    if (newProjectData.name.trim().length < 3) {
+      errors.name = 'Название должно быть не менее 3 символов';
+    }
+    
+    if (newProjectData.deadline) {
+      const deadlineDate = new Date(newProjectData.deadline);
+      const today = new Date();
+      
+      if (deadlineDate < today) {
+        errors.deadline = 'Дедлайн не может быть в прошлом';
+      }
+    }
+    
+    setModalErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleCreateProject = async () => {
+    if (!validateProjectForm()) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const response = await fetch(apiAddress + 'project/create', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newProjectData.name,
+          description: newProjectData.description
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Обновляем список проектов
+        await getProjectMemberships();
+        
+        // Закрываем модалку и сбрасываем форму
+        handleModalClose();
+        
+        // Показываем успешное сообщение
+        setError('');
+        
+      } else {
+        const errorData = await response.json();
+        setModalErrors({ api: errorData.message || 'Ошибка создания проекта' });
+      }
+    } catch (err) {
+      setModalErrors({ api: 'Ошибка соединения' });
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewProjectData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Очищаем ошибку при вводе
+    if (modalErrors[name]) {
+      setModalErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleLogout = async () => {
+    const response = await fetch(apiAddress + 'auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    navigate('/');
   };
 
   return (
@@ -85,7 +174,7 @@ const Projects = () => {
         <div className={styles.header}>
           <h1 className={styles.title}>Мои проекты</h1>
           <div className={styles.actions}>
-            <Button variant="start" onClick={handleCreateProject}>
+            <Button variant="start" onClick={handleCreateProjectClick}>
               Создать проект
             </Button>
             <button className={styles.logout} onClick={handleLogout}>
@@ -96,9 +185,19 @@ const Projects = () => {
         
         <div className={styles.grid}>
           {projects.map(project => (
-            <ProjectCard key={project.id} project={project} />
+            <ProjectCard 
+              key={project.projectId} 
+              project={project} 
+              onFollowProject={() => handleLoginIntoProject(project.projectId)}
+            />
           ))}
         </div>
+
+        {error && (
+          <div className={styles.errorMessage}>
+            {error}
+          </div>
+        )}
         
         <div className={styles.stats}>
           <div className={styles.statItem}>
@@ -107,13 +206,14 @@ const Projects = () => {
           </div>
           <div className={styles.statItem}>
             <span className={styles.statNumber}>
-              {projects.filter(p => new Date(p.deadline) > new Date()).length}
+              {projects.filter(p => p.deadline && new Date(p.deadline) > new Date()).length}
             </span>
             <span className={styles.statLabel}>Активных</span>
           </div>
           <div className={styles.statItem}>
             <span className={styles.statNumber}>
               {projects.filter(p => {
+                if (!p.deadline) return false;
                 const diffTime = new Date(p.deadline) - new Date();
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                 return diffDays <= 7 && diffDays > 0;
@@ -123,6 +223,88 @@ const Projects = () => {
           </div>
         </div>
       </div>
+
+      {/* Модальное окно создания проекта */}
+      {isModalOpen && (
+        <div className={styles.modalOverlay} onClick={handleModalClose}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Создать новый проект</h2>
+              <button className={styles.closeButton} onClick={handleModalClose}>
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              {modalErrors.api && (
+                <div className={styles.apiError}>
+                  {modalErrors.api}
+                </div>
+              )}
+              
+              <div className={styles.formGroup}>
+                <label htmlFor="projectName">Название проекта *</label>
+                <input
+                  type="text"
+                  id="projectName"
+                  name="name"
+                  value={newProjectData.name}
+                  onChange={handleInputChange}
+                  placeholder="Введите название проекта"
+                  className={modalErrors.name ? styles.inputError : ''}
+                />
+                {modalErrors.name && (
+                  <span className={styles.errorText}>{modalErrors.name}</span>
+                )}
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label htmlFor="projectDescription">Описание *</label>
+                <textarea
+                  id="projectDescription"
+                  name="description"
+                  value={newProjectData.description}
+                  onChange={handleInputChange}
+                  placeholder="Опишите проект"
+                  rows="4"
+                />
+              </div>
+              
+              <div className={styles.formGroup}>
+                <label htmlFor="projectDeadline">Дедлайн (необязательно)</label>
+                <input
+                  type="date"
+                  id="projectDeadline"
+                  name="deadline"
+                  value={newProjectData.deadline}
+                  onChange={handleInputChange}
+                  className={modalErrors.deadline ? styles.inputError : ''}
+                />
+                {modalErrors.deadline && (
+                  <span className={styles.errorText}>{modalErrors.deadline}</span>
+                )}
+              </div>
+            </div>
+            
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.cancelButton}
+                onClick={handleModalClose}
+                disabled={isSubmitting}
+              >
+                Отмена
+              </button>
+              <button 
+                className={styles.createButton}
+                onClick={handleCreateProject}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Создание...' : 'Создать проект'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
