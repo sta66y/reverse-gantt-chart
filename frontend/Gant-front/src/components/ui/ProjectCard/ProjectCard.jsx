@@ -67,7 +67,7 @@ const ProjectCard = ({ project, onFollowProject}) => {
       <div className={styles.deadline}>
         <span className={styles.deadlineLabel}>Дедлайн:</span>
         <span className={`${styles.deadlineDate} ${styles[deadlineStatus]}`}>
-          {formatDate(project.deadline)}
+          {formatDate(project.deadline) || 'Не установлен'}
         </span>
       </div>
     </div>

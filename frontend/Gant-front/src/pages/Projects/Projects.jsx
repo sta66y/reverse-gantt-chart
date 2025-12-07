@@ -11,8 +11,8 @@ const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newProjectData, setNewProjectData] = useState({
-    name: '',
-    description: '',
+    projectName: '',
+    projectDescription: '',
     deadline: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,6 +42,9 @@ const Projects = () => {
           role: item.role || item.userRole,
           deadline: item.deadline || item.endDate
         }));
+
+        console.log("Получены проекты:")
+        console.log(formattedProjects)
         
         setProjects(formattedProjects);
         setError('');
@@ -55,7 +58,7 @@ const Projects = () => {
   };
 
   const handleLoginIntoProject = async (projectId) => {
-    const response = await fetch(apiAddress + 'LoginIntoProject/' + projectId, {
+    const response = await fetch(apiAddress + 'loginIntoProject/' + projectId, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' }
@@ -75,19 +78,23 @@ const Projects = () => {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    setNewProjectData({ name: '', description: '', deadline: '' });
+    setNewProjectData({ projectName: '', projectDescription: '', deadline: '' });
     setModalErrors({});
   };
 
   const validateProjectForm = () => {
     const errors = {};
     
-    if (!newProjectData.name.trim()) {
-      errors.name = 'Название обязательно';
+    if (!newProjectData.projectName.trim()) {
+      errors.projectName = 'Название обязательно';
     }
     
-    if (newProjectData.name.trim().length < 3) {
-      errors.name = 'Название должно быть не менее 3 символов';
+    if (newProjectData.projectName.trim().length < 3) {
+      errors.projectName = 'Название должно быть не менее 3 символов';
+    }
+
+    if(!newProjectData.projectDescription.trim()) {
+      errors.projectDescription = 'Описание обязательно'
     }
     
     if (newProjectData.deadline) {
@@ -109,18 +116,25 @@ const Projects = () => {
     setIsSubmitting(true);
     
     try {
+      console.log("Отправка на сервер...")
+      console.log(newProjectData)
       const response = await fetch(apiAddress + 'project/create', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: newProjectData.name,
-          description: newProjectData.description
+          projectName: newProjectData.projectName,
+          description: newProjectData.projectDescription,
+          deadline: newProjectData.deadline
         })
       });
       
+      
       if (response.ok) {
         const data = await response.json();
+
+        console.log("Ответ: ")
+        console.log(data)
         
         // Обновляем список проектов
         await getProjectMemberships();
@@ -247,14 +261,14 @@ const Projects = () => {
                 <input
                   type="text"
                   id="projectName"
-                  name="name"
-                  value={newProjectData.name}
+                  name="projectName"
+                  value={newProjectData.projectName}
                   onChange={handleInputChange}
                   placeholder="Введите название проекта"
-                  className={modalErrors.name ? styles.inputError : ''}
+                  className={modalErrors.projectName ? styles.inputError : ''}
                 />
-                {modalErrors.name && (
-                  <span className={styles.errorText}>{modalErrors.name}</span>
+                {modalErrors.projectName && (
+                  <span className={styles.errorText}>{modalErrors.projectName}</span>
                 )}
               </div>
               
@@ -262,12 +276,15 @@ const Projects = () => {
                 <label htmlFor="projectDescription">Описание *</label>
                 <textarea
                   id="projectDescription"
-                  name="description"
-                  value={newProjectData.description}
+                  name="projectDescription"
+                  value={newProjectData.projectDescription}
                   onChange={handleInputChange}
                   placeholder="Опишите проект"
                   rows="4"
                 />
+                {modalErrors.projectDescription && (
+                  <span className={styles.errorText}>{modalErrors.projectDescription}</span>
+                )}
               </div>
               
               <div className={styles.formGroup}>
