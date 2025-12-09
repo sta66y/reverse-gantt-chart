@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import styles from './TaskTree.module.css';
 
-const TaskTree = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask }) => {
+const TaskTree = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask, onShowComments }) => {
   const [expandedTasks, setExpandedTasks] = useState(new Set());
 
   const toggleTask = (taskId) => {
@@ -46,12 +46,11 @@ const TaskTree = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask 
             </span>
             
             <div className={styles.taskMeta}>
-              <span className={`${styles.priority} ${styles[task.priority]}`}>
-                {task.priority === 'high' && '🔴'}
-                {task.priority === 'medium' && '🟡'} 
-                {task.priority === 'low' && '🟢'}
+              <span className={`${styles.priority} ${styles[task.reviewerStatus]}`}>
+                {task.reviewerStatus === 'Rejected' && '🔴'}
+                {task.reviewerStatus === 'None' && '🟡'} 
+                {task.reviewerStatus === 'Accepted' && '🟢'}
               </span>
-              <span className={styles.progress}>{task.progress}%</span>
               <span className={styles.dates}>
                 {task.startDate} - {task.endDate}
               </span>
@@ -60,6 +59,7 @@ const TaskTree = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask 
             <div className={styles.taskActions}>
               <div 
               className={styles.commentButton}
+              onClick={() => onShowComments(task)}
             >
               💬 {task.comments?.length || 0}
             </div>
@@ -103,7 +103,7 @@ const TaskTree = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask 
     <div className={styles.taskTree}>
       <div className={styles.header}>
         <div className={styles.headerTitle}>Задача</div>
-        <div className={styles.headerMeta}>Прогресс и даты</div>
+        <div className={styles.headerMeta}>Даты и статус ревьюера</div>
         <div className={styles.headerActions}>Действия</div>
       </div>
       

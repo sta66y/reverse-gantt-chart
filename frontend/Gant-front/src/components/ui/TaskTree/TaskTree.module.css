@@ -105,15 +105,15 @@
   font-size: 14px;
 }
 
-.priority.high {
+.Rejected {
   color: #dc3545;
 }
 
-.priority.medium {
+.None {
   color: #ffc107;
 }
 
-.priority.low {
+.Accepted {
   color: #28a745;
 }
 

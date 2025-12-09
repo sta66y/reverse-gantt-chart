@@ -1,17 +1,31 @@
 // pages/Project/Project.jsx
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import GanttChart from '../../components/ui/GanttChart';
 import TaskTree from '../../components/ui/TaskTree';
 import TaskModal from '../../components/ui/TaskModal';
+import CommentsModal from '../../components/ui/CommentsModal'
 import styles from './Project.module.css';
 
 const Project = () => {
+  const apiAddress = import.meta.env.VITE_API_ADDRESS;
   const { projectId } = useParams();
+  const navigate = useNavigate();
+  
+  const [projectName, setProjectName] = useState("");
+  const [projectDescription, setProjectDescription] = useState("");
+  const [projectDeadline, setProjectDeadline] = useState(null);
+  const [projectCreatedDate, setProjectCreatedDate] = useState(null);
+  const [projectUpdatedDate, setProjectUpdatedDate] = useState(null);
+  const [projectOwnerEmail, setProjectOwnerEmail] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState('gantt'); // 'gantt', 'tree', 'users'
+  
+  const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false);
+  const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false); // НОВОЕ состояние
+  const [taskForComments, setTaskForComments] = useState(null); // Задача для комментариев
 
   // Тестовые данные пользователей проекта
   const projectUsers = [
@@ -25,25 +39,118 @@ const Project = () => {
     { id: 8, email: 'devops@company.com', role: 'Разработчик' },
   ];
 
-  // Загрузка данных проекта
   useEffect(() => {
     const mockTasks = generateMockTasks();
+    getProjectInfo();
     setTasks(mockTasks);
-  }, [projectId]);
+  }, []);
 
-  // Добавление новой задачи
+  const getProjectInfo = async () => {
+    const response = await fetch(apiAddress + 'project/info' + "?projectId=" + projectId, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setProjectName(data.projectName);
+      setProjectDescription(data.projectDescription);
+      setProjectDeadline(data.deadline);
+      setProjectCreatedDate(data.createdAt);
+      setProjectUpdatedDate(data.updatedAt);
+      setProjectOwnerEmail(data.projectOwnerEmail);
+    } else {
+      setProjectName("unknown");
+      console.log("Не удалось получить название проекта");
+    }
+  };
+
+  const handleBackToProjects = () => {
+    navigate('/projects');
+  };
+
+  const handleShowProjectInfo = () => {
+    setIsProjectInfoOpen(true);
+  };
+
+  const handleCloseProjectInfo = () => {
+    setIsProjectInfoOpen(false);
+  };
+
+
+  const handleShowComments = (task) => {
+    setTaskForComments(task);
+    setIsCommentsModalOpen(true);
+  };
+
+  // Функция для добавления комментария
+  const handleAddComment = (taskId, commentText) => {
+    const newComment = {
+      id: Date.now().toString(),
+      email: 'current.user@company.com', // Текущий пользователь
+      role: 'Разработчик', // Роль пользователя
+      text: commentText,
+      createdAt: new Date().toISOString()
+    };
+
+    // Обновляем задачу с новым комментарием
+    const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+        return {
+          ...task,
+          comments: [...(task.comments || []), newComment]
+        };
+      }
+      // Также ищем в детях
+      const updateChildren = (tasksArray) => {
+        return tasksArray.map(t => {
+          if (t.id === taskId) {
+            return {
+              ...t,
+              comments: [...(t.comments || []), newComment]
+            };
+          }
+          if (t.children) {
+            return {
+              ...t,
+              children: updateChildren(t.children)
+            };
+          }
+          return t;
+        });
+      };
+      
+      if (task.children) {
+        return {
+          ...task,
+          children: updateChildren(task.children)
+        };
+      }
+      return task;
+    });
+
+    setTasks(updatedTasks);
+    
+    // Обновляем также taskForComments если он открыт
+    if (taskForComments && taskForComments.id === taskId) {
+      setTaskForComments(prev => ({
+        ...prev,
+        comments: [...(prev.comments || []), newComment]
+      }));
+    }
+  };
+  
+
   const handleAddTask = (parentId = null) => {
     setSelectedTask({ parentId });
     setIsModalOpen(true);
   };
 
-  // Сохранение задачи
   const handleSaveTask = (taskData) => {
     if (taskData.id) {
-      // Редактирование существующей задачи
       setTasks(prev => updateTaskInTree(prev, taskData));
     } else {
-      // Добавление новой задачи
       const newTask = {
         id: Date.now().toString(),
         ...taskData,
@@ -60,12 +167,10 @@ const Project = () => {
     setSelectedTask(null);
   };
 
-  // Удаление задачи (только если нет детей)
   const handleDeleteTask = (taskId) => {
     setTasks(prev => deleteTaskFromTree(prev, taskId));
   };
 
-  // Вспомогательные функции для работы с деревом
   const updateTaskInTree = (tasks, updatedTask) => {
     return tasks.map(task => {
       if (task.id === updatedTask.id) {
@@ -106,7 +211,6 @@ const Project = () => {
     });
   };
 
-  // Функция для получения цвета роли
   const getRoleColor = (role) => {
     const roleColors = {
       'Менеджер': '#ff6b6b',
@@ -119,7 +223,6 @@ const Project = () => {
     return roleColors[role] || '#667eea';
   };
 
-  // Функция для подсчета пользователей по ролям
   const getRoleStats = () => {
     const stats = {};
     projectUsers.forEach(user => {
@@ -128,38 +231,67 @@ const Project = () => {
     return stats;
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Не указана';
+    return new Date(dateString).toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
   const roleStats = getRoleStats();
 
   return (
     <div className={styles.project}>
       <header className={styles.header}>
-        <h1>Проект #{projectId}</h1>
-        <div className={styles.controls}>
+        <div className={styles.headerLeft}>
           <button 
-            className={styles.addButton}
-            onClick={() => handleAddTask()}
+            className={styles.backButton}
+            onClick={handleBackToProjects}
+            title="Вернуться к проектам"
           >
-            + Добавить задачу
+            ← Назад к проектам
           </button>
-          <div className={styles.viewToggle}>
+          <h1>{projectName || "Загрузка..."}</h1>
+        </div>
+        
+        <div className={styles.headerRight}>
+          <button 
+            className={styles.infoButton}
+            onClick={handleShowProjectInfo}
+            title="Информация о проекте"
+          >
+            ℹ️ О проекте
+          </button>
+          
+          <div className={styles.controls}>
             <button 
-              className={viewMode === 'gantt' ? styles.active : ''}
-              onClick={() => setViewMode('gantt')}
+              className={styles.addButton}
+              onClick={() => handleAddTask()}
             >
-              Диаграмма Ганта
+              + Добавить задачу
             </button>
-            <button 
-              className={viewMode === 'tree' ? styles.active : ''}
-              onClick={() => setViewMode('tree')}
-            >
-              Дерево задач
-            </button>
-            <button 
-              className={viewMode === 'users' ? styles.active : ''}
-              onClick={() => setViewMode('users')}
-            >
-              Участники
-            </button>
+            <div className={styles.viewToggle}>
+              <button 
+                className={viewMode === 'gantt' ? styles.active : ''}
+                onClick={() => setViewMode('gantt')}
+              >
+                Диаграмма Ганта
+              </button>
+              <button 
+                className={viewMode === 'tree' ? styles.active : ''}
+                onClick={() => setViewMode('tree')}
+              >
+                Дерево задач
+              </button>
+              <button 
+                className={viewMode === 'users' ? styles.active : ''}
+                onClick={() => setViewMode('users')}
+              >
+                Участники
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -175,6 +307,7 @@ const Project = () => {
             }}
             onAddSubtask={handleAddTask}
             onDeleteTask={handleDeleteTask}
+            onShowComments={handleShowComments}
           />
         ) : viewMode === 'tree' ? (
           <TaskTree 
@@ -186,6 +319,7 @@ const Project = () => {
             }}
             onAddSubtask={handleAddTask}
             onDeleteTask={handleDeleteTask}
+            onShowComments={handleShowComments}
           />
         ) : (
           <div className={styles.usersView}>
@@ -242,6 +376,89 @@ const Project = () => {
         )}
       </main>
 
+      {/* Модальное окно комментариев */}
+      {isCommentsModalOpen && taskForComments && (
+        <CommentsModal
+          task={taskForComments}
+          onClose={() => {
+            setIsCommentsModalOpen(false);
+            setTaskForComments(null);
+          }}
+          onAddComment={handleAddComment}
+        />
+      )}
+
+      {isProjectInfoOpen && (
+        <div className={styles.modalOverlay} onClick={handleCloseProjectInfo}>
+          <div className={styles.projectModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>Информация о проекте</h2>
+              <button className={styles.closeButton} onClick={handleCloseProjectInfo}>
+                ✕
+              </button>
+            </div>
+            
+            <div className={styles.modalBody}>
+              <div className={styles.infoRow}>
+                <span className={styles.infoLabel}>Название:</span>
+                <span className={styles.infoValue}>
+                  {projectName || "Разработка мобильного приложения"}
+                </span>
+              </div>
+              
+              <div className={styles.infoRow}>
+                <span className={styles.infoLabel}>Описание:</span>
+                <div className={styles.infoDescription}>
+                  {projectDescription || 
+                    "Создание кроссплатформенного приложения для управления задачами с синхронизацией в реальном времени. " +
+                    "Проект включает разработку frontend и backend частей, интеграцию с внешними API и создание системы уведомлений."}
+                </div>
+              </div>
+              
+              <div className={styles.infoRow}>
+                <span className={styles.infoLabel}>Дедлайн:</span>
+                <span className={styles.infoValue}>
+                  {projectDeadline ? formatDate(projectDeadline) : "Не установлен"}
+                </span>
+              </div>
+              
+              <div className={styles.infoRow}>
+                <span className={styles.infoLabel}>Email владельца:</span>
+                <span className={styles.infoValue}>
+                  {projectOwnerEmail || "Не установлен"}
+                </span>
+              </div>
+              
+              <div className={styles.infoRow}>
+                <span className={styles.infoLabel}>Дата создания:</span>
+                <span className={styles.infoValue}>
+                  {projectCreatedDate ? formatDate(projectCreatedDate) : "Нет редактирований"}
+                </span>
+              </div>
+
+              <div className={styles.infoRow}>
+                <span className={styles.infoLabel}>Дата редакт. :</span>
+                <span className={styles.infoValue}>
+                  {formatDate(projectUpdatedDate)}
+                </span>
+              </div>
+              
+              
+            </div>
+            
+            <div className={styles.modalFooter}>
+              <button 
+                className={styles.closeModalButton}
+                onClick={handleCloseProjectInfo}
+              >
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно редактирования задачи (БЕЗ комментариев) */}
       {isModalOpen && (
         <TaskModal
           task={selectedTask}
@@ -256,7 +473,6 @@ const Project = () => {
   );
 };
 
-// Генерация тестовых данных
 const generateMockTasks = () => [
   {
     id: '1',
@@ -265,7 +481,7 @@ const generateMockTasks = () => [
     startDate: '2024-01-01',
     endDate: '2024-01-31',
     status: 'In process',
-    reviewerStatus: 'None',
+    reviewerStatus: 'Rejected',
     children: [
       {
         id: '2',

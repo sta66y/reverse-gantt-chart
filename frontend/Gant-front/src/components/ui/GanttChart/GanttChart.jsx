@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react';
 import styles from './GanttChart.module.css';
 
-const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask }) => {
+const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask, onShowComments }) => {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [expandedTasks, setExpandedTasks] = useState(new Set());
 
@@ -107,6 +107,7 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
             style={{ width: `${LEFT_PANEL_WIDTH}px` }}
           >
             <div className={styles.taskInfoContent}>
+              {/* Кнопка развертывания */}
               <button 
                 className={styles.expandButton}
                 onClick={(e) => {
@@ -133,11 +134,19 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
               </span>
               
               <div className={styles.taskActions}>
-                <div 
-            className={styles.commentButton}
-          >
-            💬 {task.comments?.length || 0}
-          </div>
+                {/* Кнопка комментариев - ОТКРЫВАЕТ CommentsModal */}
+                <button 
+                  className={styles.commentButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShowComments(task); // Вызываем функцию для показа комментариев
+                  }}
+                  title="Комментарии"
+                >
+                  💬 {task.comments?.length || 0}
+                </button>
+                
+                {/* Остальные кнопки */}
                 <button onClick={(e) => {
                   e.stopPropagation();
                   onAddSubtask(task.id);

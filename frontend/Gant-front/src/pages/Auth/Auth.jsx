@@ -71,17 +71,17 @@ const Auth = () => {
       // Имитация ответа от сервера
       // В реальном приложении здесь будет:
 
-      if(!isLogin) {
-        const response = await fetch(apiAddress + 'auth/register', {
-          method: 'POST',
-          credentials: 'include',  // ← ВАЖНО!
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-        if(!response.ok) throw new Error("Ошибка на стороне регистрации: " + response.message)
-      }
+      // if(!isLogin) {
+      //   const response = await fetch(apiAddress + 'auth/register', {
+      //     method: 'POST',
+      //     credentials: 'include',  // ← ВАЖНО!
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(formData)
+      //   });
+      //   if(!response.ok) throw new Error("Ошибка на стороне регистрации: " + response.message)
+      // }
 
-      const response = await fetch(apiAddress + 'auth/login', {
+      const response = await fetch(apiAddress + 'auth/' + (isLogin ? 'login' : 'register'), {
         method: 'POST',
         credentials: 'include',  // ← ВАЖНО!
         headers: { 'Content-Type': 'application/json' },
@@ -93,8 +93,10 @@ const Auth = () => {
       if (response.ok) {
         const data = await response.json();
         console.log(data)
+
         // Переходим на страницу проектов
-        navigate('/projects');
+        if(isLogin) navigate('/projects');
+        else window.location.reload()
       }
       else  {
         // Имитация ошибки от сервера
