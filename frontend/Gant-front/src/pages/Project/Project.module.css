@@ -471,3 +471,98 @@
     justify-content: center;
   }
 }
+
+/* Добавляем стиль для кнопки выхода */
+
+.exitButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.exitButton:hover {
+  background: #c82333;
+}
+
+/* Обновляем headerLeft для размещения кнопок */
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.headerLeft h1 {
+  margin: 0;
+  margin-left: 10px;
+}
+
+/* Остальные стили без изменений */
+.backButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.backButton:hover {
+  background: #545b62;
+}
+
+.infoButton {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.infoButton:hover {
+  background: #138496;
+}
+
+/* Адаптивность для кнопок */
+@media (max-width: 768px) {
+  .headerLeft {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .headerLeft h1 {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 10px;
+  }
+  
+  .exitButton,
+  .backButton {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerLeft {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .exitButton,
+  .backButton {
+    width: 100%;
+  }
+}

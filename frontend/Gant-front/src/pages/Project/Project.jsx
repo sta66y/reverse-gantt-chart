@@ -65,6 +65,27 @@ const Project = () => {
       console.log("Не удалось получить название проекта");
     }
   };
+  const deleteProject = async () => {
+    const response = await fetch(apiAddress + 'project/action/delete' + "?projectId=" + projectId, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+    if (response.ok) {
+      console.log("Текущий проект успешно удален")
+    } else {
+      console.log("Не удалось удалить проект");
+    }
+  }
+
+  const handleDeleteProject = async () => {
+    console.log('Удаление проекта:', projectId);
+    if (window.confirm(`Удалить проект "${projectName}"?`)) {
+      await deleteProject();
+      handleBackToProjects();
+    }
+  };
 
   const handleBackToProjects = () => {
     navigate('/projects');
@@ -246,6 +267,15 @@ const Project = () => {
     <div className={styles.project}>
       <header className={styles.header}>
         <div className={styles.headerLeft}>
+          {/* НОВАЯ кнопка выхода из проекта */}
+          <button 
+            className={styles.exitButton}
+            onClick={handleDeleteProject}
+            title="Удалить проект"
+          >
+            Удалить проект
+          </button>
+
           <button 
             className={styles.backButton}
             onClick={handleBackToProjects}
