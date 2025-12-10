@@ -587,7 +587,7 @@ const Project = () => {
     if (!commentText.trim()) return;
 
     try {
-      const response = await fetch(apiAddress + "comment/create", {
+      const response = await fetch(apiAddress + "comment/create?projectId=" + projectId, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },

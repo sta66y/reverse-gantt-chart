@@ -144,34 +144,7 @@ const TaskModal = ({ task, onSave, onClose }) => {
             </div>
           </div>
 
-          <div className={styles.row}>
-            <div className={styles.formGroup}>
-              <label>Статус задачи:</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-              >
-                <option value="Planned">Запланирована</option>
-                <option value="In process">В процессе</option>
-                <option value="Completed">Завершена</option>
-                <option value="Delayed">Отложена</option>
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Статус проверки:</label>
-              <select
-                name="reviewerStatus"
-                value={formData.reviewerStatus}
-                onChange={handleChange}
-              >
-                <option value="None">Не проверялась</option>
-                <option value="Accepted">Принята</option>
-                <option value="Rejected">Отклонена</option>
-              </select>
-            </div>
-          </div>
+          
 
           <div className={styles.buttons}>
             <button type="button" onClick={onClose} className={styles.cancel}>
