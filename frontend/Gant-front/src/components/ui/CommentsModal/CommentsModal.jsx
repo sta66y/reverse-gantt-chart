@@ -3,6 +3,7 @@ import styles from './CommentsModal.module.css';
 
 const CommentsModal = ({ task, onClose, onAddComment }) => {
   const [newComment, setNewComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const formatDate = (dateString) => {
     if (!dateString) return '';
@@ -15,12 +16,42 @@ const CommentsModal = ({ task, onClose, onAddComment }) => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (newComment.trim()) {
-      onAddComment(task.id, newComment.trim());
+    if (!newComment.trim() || !task?.id) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      await onAddComment(task.id, newComment.trim());
       setNewComment('');
+    } catch (err) {
+      console.error('Ошибка при добавлении комментария:', err);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const getRoleString = (role) => {
+    const roleStrings = {
+      ROLE_ADMIN: "Админ",
+      ROLE_PLANNER: "Планнер",
+      ROLE_REVIEWER: "Ревьюер",
+      ROLE_STUDENT: "Студент",
+      ROLE_VIEWER: "Гость",
+    };
+    return roleStrings[role] || "Неизвестный";
+  };
+
+  const getRoleColor = (role) => {
+    const roleColors = {
+      ROLE_ADMIN: "#ff6b6b",
+      ROLE_PLANNER: "#4ecdc4",
+      ROLE_REVIEWER: "#45b7d1",
+      ROLE_STUDENT: "#96ceb4",
+      ROLE_VIEWER: "#feca57",
+    };
+    return roleColors[role] || "#667eea";
   };
 
   return (
@@ -29,7 +60,11 @@ const CommentsModal = ({ task, onClose, onAddComment }) => {
         <div className={styles.modalHeader}>
           <h2>Комментарии к задаче</h2>
           <h3 className={styles.taskTitle}>"{task?.title}"</h3>
-          <button className={styles.closeButton} onClick={onClose}>
+          <button 
+            className={styles.closeButton} 
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             ✕
           </button>
         </div>
@@ -37,20 +72,36 @@ const CommentsModal = ({ task, onClose, onAddComment }) => {
         <div className={styles.modalBody}>
           <div className={styles.commentsList}>
             {task?.comments?.length > 0 ? (
-              task.comments.map(comment => (
-                <div key={comment.id} className={styles.comment}>
-                  <div className={styles.commentHeader}>
-                    <div className={styles.commentAuthor}>
-                      <span className={styles.authorEmail}>{comment.email}</span>
-                      <span className={styles.authorRole}>{comment.role}</span>
+              task.comments.map(comment => {
+                // Поддерживаем оба формата: старый (mock) и новый (API)
+                const commenter = comment.commenter || { 
+                  email: comment.email, 
+                  userRole: comment.role 
+                };
+                const commentText = comment.comment || comment.text;
+                
+                return (
+                  <div key={comment.id} className={styles.comment}>
+                    <div className={styles.commentHeader}>
+                      <div className={styles.commentAuthor}>
+                        <span className={styles.authorEmail}>
+                          {commenter.email || 'Неизвестный пользователь'}
+                        </span>
+                        <span 
+                          className={styles.authorRole}
+                          style={{ backgroundColor: getRoleColor(commenter.userRole) }}
+                        >
+                          {getRoleString(commenter.userRole)}
+                        </span>
+                      </div>
+                      <span className={styles.commentDate}>
+                        {formatDate(comment.createdAt)}
+                      </span>
                     </div>
-                    <span className={styles.commentDate}>
-                      {formatDate(comment.createdAt)}
-                    </span>
+                    <p className={styles.commentText}>{commentText}</p>
                   </div>
-                  <p className={styles.commentText}>{comment.text}</p>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className={styles.noComments}>
                 <p>Пока нет комментариев</p>
@@ -67,21 +118,23 @@ const CommentsModal = ({ task, onClose, onAddComment }) => {
               rows="3"
               className={styles.commentInput}
               required
+              disabled={isSubmitting}
             />
             <div className={styles.formActions}>
               <button 
                 type="button" 
                 onClick={onClose}
                 className={styles.cancelButton}
+                disabled={isSubmitting}
               >
                 Закрыть
               </button>
               <button 
                 type="submit" 
                 className={styles.submitButton}
-                disabled={!newComment.trim()}
+                disabled={!newComment.trim() || isSubmitting}
               >
-                Добавить комментарий
+                {isSubmitting ? 'Отправка...' : 'Добавить комментарий'}
               </button>
             </div>
           </form>

@@ -66,10 +66,11 @@ const Project = () => {
   // ]);
 
   useEffect(() => {
-    const mockTasks = generateMockTasks();
+    //const mockTasks = generateMockTasks();
     getProjectInfo();
     getProjectUsers();
-    setTasks(mockTasks);
+    getProjectTasks();
+    //setTasks(mockTasks);
   }, []);
 
   const getProjectInfo = async () => {
@@ -113,6 +114,91 @@ const Project = () => {
         message: "Не удалось удалить проект",
         code: response.status,
       });
+    }
+  };
+
+
+
+  
+
+  // Добавьте эту функцию после других функций get:
+  const getProjectTasks = async () => {
+    try {
+      const response = await fetch(
+        apiAddress + "projectComponent/all" + "?projectId=" + projectId,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Получены задачи:", data);
+
+        // Преобразуем данные API в формат для UI
+        const transformedTasks = transformApiTasksToUITasks(data);
+        setTasks(transformedTasks);
+      } else {
+        const errorData = await response.json();
+        showError({
+          message: errorData.message || "Не удалось загрузить задачи",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      showError({
+        message: "Ошибка соединения при загрузке задач",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    }
+  };
+
+  // Функция для преобразования API данных в формат UI
+  const transformApiTasksToUITasks = (apiTasks) => {
+    if (!apiTasks || !Array.isArray(apiTasks)) {
+      return [];
+    }
+
+    return apiTasks.map((task) => ({
+      id: task.id?.toString() || Date.now().toString(),
+      title: task.title || "Без названия",
+      description: task.description || "",
+      startDate: formatDateForUI(task.startData || task.startDate),
+      endDate: formatDateForUI(task.deadline),
+      status: task.taskStatus?.status || "Planned",
+      reviewerStatus: task.reviewerTaskStatus?.status || "None",
+      children: task.children ? transformApiTasksToUITasks(task.children) : [],
+      parentId: task.parentId?.toString() || null,
+      creator: task.creator,
+      comments: task.comments || [],
+      taskMakers: task.taskMakers || [],
+      // Дополнительные данные
+      taskStatus: task.taskStatus,
+      reviewerTaskStatus: task.reviewerTaskStatus,
+      projectId: task.projectId,
+      createdDate: task.createdDate,
+      pos: task.pos,
+    }));
+  };
+
+  // Функция для форматирования дат
+  const formatDateForUI = (date) => {
+    if (!date) return "";
+
+    // Если это строка даты
+    if (typeof date === "string") {
+      return date.split("T")[0]; // Берем только дату без времени
+    }
+
+    // Если это объект Date или timestamp
+    try {
+      const d = new Date(date);
+      return d.toISOString().split("T")[0];
+    } catch (err) {
+      return "";
     }
   };
 
@@ -208,8 +294,6 @@ const Project = () => {
           email: "",
           userRole: "ROLE_STUDENT",
         });
-
-
       } else {
         const errorData = await response.json();
         setAddUserErrors({
@@ -242,18 +326,22 @@ const Project = () => {
 
     try {
       const response = await fetch(
-        apiAddress + "membership/action/remove" + "?projectId=" + projectId + "&email=" + userToDelete.email,
+        apiAddress +
+          "membership/action/remove" +
+          "?projectId=" +
+          projectId +
+          "&email=" +
+          userToDelete.email,
         {
           method: "DELETE",
           credentials: "include",
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
         }
       );
 
       if (response.ok) {
         // Обновляем список пользователей
         await getProjectUsers();
-
       } else {
         const errorData = await response.json();
         showError?.({
@@ -283,28 +371,34 @@ const Project = () => {
 
     const getRequestRoleName = (role) => {
       const roleRequestNames = {
-      ROLE_PLANNER: "PLANNER",
-      ROLE_REVIEWER: "REVIEWER",
-      ROLE_STUDENT: "STUDENT",
-      ROLE_VIEWER: "VIEWER",
+        ROLE_PLANNER: "PLANNER",
+        ROLE_REVIEWER: "REVIEWER",
+        ROLE_STUDENT: "STUDENT",
+        ROLE_VIEWER: "VIEWER",
+      };
+      return roleRequestNames[role] || "unknown";
     };
-    return roleRequestNames[role] || "unknown";
-    }
 
     try {
       const response = await fetch(
-        apiAddress + "membership/action/updateAuthority" + "?projectId=" + projectId + "&email=" + userToEditRole.email + "&role=" + getRequestRoleName(selectedRole),
+        apiAddress +
+          "membership/action/updateAuthority" +
+          "?projectId=" +
+          projectId +
+          "&email=" +
+          userToEditRole.email +
+          "&role=" +
+          getRequestRoleName(selectedRole),
         {
           method: "PATCH",
           credentials: "include",
-          headers: { "Content-Type": "application/json" }
+          headers: { "Content-Type": "application/json" },
         }
       );
 
       if (response.ok) {
         // Обновляем список пользователей
         await getProjectUsers();
-
       } else {
         const errorData = await response.json();
         showError?.({
@@ -464,85 +558,157 @@ const Project = () => {
   };
 
   // Функция для добавления комментария
-  const handleAddComment = (taskId, commentText) => {
-    const newComment = {
-      id: Date.now().toString(),
-      email: "current.user@company.com", // Текущий пользователь
-      role: "Разработчик", // Роль пользователя
-      text: commentText,
-      createdAt: new Date().toISOString(),
-    };
-
-    // Обновляем задачу с новым комментарием
-    const updatedTasks = tasks.map((task) => {
-      if (task.id === taskId) {
-        return {
-          ...task,
-          comments: [...(task.comments || []), newComment],
-        };
-      }
-      // Также ищем в детях
-      const updateChildren = (tasksArray) => {
-        return tasksArray.map((t) => {
-          if (t.id === taskId) {
-            return {
-              ...t,
-              comments: [...(t.comments || []), newComment],
-            };
-          }
-          if (t.children) {
-            return {
-              ...t,
-              children: updateChildren(t.children),
-            };
-          }
-          return t;
-        });
-      };
-
-      if (task.children) {
-        return {
-          ...task,
-          children: updateChildren(task.children),
-        };
-      }
-      return task;
+  // В Project.jsx убедитесь что функция handleAddComment выглядит так:
+const handleAddComment = async (taskId, commentText) => {
+  if (!commentText.trim()) return;
+  
+  try {
+    const response = await fetch(apiAddress + "comment/create", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        projectComponentId: parseInt(taskId),
+        comment: commentText
+      }),
     });
 
-    setTasks(updatedTasks);
-
-    // Обновляем также taskForComments если он открыт
-    if (taskForComments && taskForComments.id === taskId) {
-      setTaskForComments((prev) => ({
-        ...prev,
-        comments: [...(prev.comments || []), newComment],
-      }));
+    if (response.ok) {
+      const newComment = await response.json();
+      console.log("Комментарий создан:", newComment);
+      
+      // Обновляем задачи с новым комментарием
+      await getProjectTasks();
+      
+      // Обновляем также taskForComments если он открыт
+      if (taskForComments && taskForComments.id === taskId) {
+        // Обновляем локально для мгновенного отображения
+        setTaskForComments(prev => ({
+          ...prev,
+          comments: [...(prev.comments || []), {
+            id: newComment.id?.toString(),
+            comment: newComment.comment,
+            commenter: newComment.commenter,
+            createdAt: newComment.createdAt
+          }]
+        }));
+      }
+      
+    } else {
+      const errorData = await response.json();
+      showError?.({
+        message: errorData.message || "Ошибка добавления комментария",
+        code: response.status,
+      });
     }
-  };
-
+  } catch (err) {
+    showError?.({
+      message: "Ошибка соединения при добавлении комментария",
+      code: "NETWORK_ERROR",
+    });
+    console.error(err);
+  }
+};
   const handleAddTask = (parentId = null) => {
     setSelectedTask({ parentId });
     setIsModalOpen(true);
   };
 
-  const handleSaveTask = (taskData) => {
-    if (taskData.id) {
-      setTasks((prev) => updateTaskInTree(prev, taskData));
-    } else {
-      const newTask = {
-        id: Date.now().toString(),
-        ...taskData,
-        children: [],
-      };
+  const handleSaveTask = async (taskData) => {
+    try {
+      if (taskData.id) {
+        // Обновление существующей задачи
+        const response = await fetch(
+          apiAddress + "projectComponent/action/update", // TODO: Проверить endpoint для обновления
+          {
+            method: "PUT",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: parseInt(taskData.id),
+              title: taskData.title,
+              description: taskData.description,
+              startDate: taskData.startDate,
+              deadline: taskData.endDate,
+              parentId: taskData.parentId ? parseInt(taskData.parentId) : null,
+            }),
+          }
+        );
 
-      if (taskData.parentId) {
-        setTasks((prev) => addTaskToParent(prev, taskData.parentId, newTask));
+        if (response.ok) {
+          const updatedTask = await response.json();
+          // Обновляем локальное состояние
+          setTasks((prev) => updateTaskInTree(prev, taskData));
+
+          // TODO: Обновить инфо о проекте или задачи через API
+          // await getProjectTasks();
+        } else {
+          const errorData = await response.json();
+          showError({
+            message: errorData.message || "Ошибка обновления задачи",
+            code: response.status,
+          });
+        }
       } else {
-        setTasks((prev) => [...prev, newTask]);
+        // Создание новой задачи
+        const response = await fetch(
+          apiAddress + "projectComponent/action/create?projectId=" + projectId,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: taskData.title,
+              description: taskData.description,
+              startDate: taskData.startDate,
+              deadline: taskData.endDate,
+              parentId: taskData.parentId ? parseInt(taskData.parentId) : null,
+              // projectId добавляется в URL или body в зависимости от API
+            }),
+          }
+        );
+
+        if (response.ok) {
+          const createdTask = await response.json();
+
+          // Преобразуем ответ в формат для UI
+          const newTask = {
+            id: createdTask.id.toString(),
+            title: createdTask.title,
+            description: createdTask.description,
+            startDate: createdTask.startDate || createdTask.startData,
+            endDate: createdTask.deadline,
+            status: "Planned", // По умолчанию
+            reviewerStatus: "None", // По умолчанию
+            children: [],
+          };
+
+          // Добавляем в дерево
+          if (taskData.parentId) {
+            setTasks((prev) =>
+              addTaskToParent(prev, taskData.parentId, newTask)
+            );
+          } else {
+            setTasks((prev) => [...prev, newTask]);
+          }
+        } else {
+          const errorData = await response.json();
+          showError({
+            message: errorData.message || "Ошибка создания задачи",
+            code: response.status,
+          });
+        }
       }
+    } catch (err) {
+      showError({
+        message: "Ошибка соединения",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    } finally {
+      setIsModalOpen(false);
+      setSelectedTask(null);
     }
-    setIsModalOpen(false);
-    setSelectedTask(null);
   };
 
   const handleDeleteTask = (taskId) => {
@@ -783,26 +949,26 @@ const Project = () => {
                         {getRoleString(user.role)}
                       </span>
                     </div>
-                    {user.email == projectOwnerEmail ? null : <div className={styles.tableCell}>
-                      <div className={styles.userActions}>
-                        <button
-                          className={styles.editRoleButton}
-                          onClick={() => handleEditRoleClick(user)}
-                          title="Изменить роль"
-                        >
-                          Изменить роль
-                        </button>
-                        <button
-                          className={styles.deleteButton}
-                          onClick={() => handleDeleteUserClick(user)}
-                          title="Удалить из проекта"
-                        >
-                          Удалить
-                        </button>
+                    {user.email == projectOwnerEmail ? null : (
+                      <div className={styles.tableCell}>
+                        <div className={styles.userActions}>
+                          <button
+                            className={styles.editRoleButton}
+                            onClick={() => handleEditRoleClick(user)}
+                            title="Изменить роль"
+                          >
+                            Изменить роль
+                          </button>
+                          <button
+                            className={styles.deleteButton}
+                            onClick={() => handleDeleteUserClick(user)}
+                            title="Удалить из проекта"
+                          >
+                            Удалить
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    }
-                    
+                    )}
                   </div>
                 ))}
               </div>

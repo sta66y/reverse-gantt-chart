@@ -1,8 +1,15 @@
 // pages/Project/components/GanttChart/GanttChart.jsx
-import { useState, useMemo } from 'react';
-import styles from './GanttChart.module.css';
+import { useState, useMemo } from "react";
+import styles from "./GanttChart.module.css";
 
-const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTask, onShowComments }) => {
+const GanttChart = ({
+  tasks,
+  onTaskSelect,
+  onTaskEdit,
+  onAddSubtask,
+  onDeleteTask,
+  onShowComments,
+}) => {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [expandedTasks, setExpandedTasks] = useState(new Set());
 
@@ -16,22 +23,22 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
       const today = new Date();
       const defaultMax = new Date(today);
       defaultMax.setMonth(today.getMonth() + 1);
-      return { 
-        minDate: today, 
-        maxDate: defaultMax, 
-        days: 31
+      return {
+        minDate: today,
+        maxDate: defaultMax,
+        days: 31,
       };
     }
 
     const allDates = getAllDates(tasks);
     const minDate = new Date(Math.min(...allDates));
     const maxDate = new Date(Math.max(...allDates));
-    
+
     minDate.setDate(minDate.getDate() - 5);
     maxDate.setDate(maxDate.getDate() + 5);
-    
+
     const days = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)) + 1;
-    
+
     return { minDate, maxDate, days };
   }, [tasks]);
 
@@ -40,22 +47,24 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
     return (
       <div className={styles.datesRow}>
         {/* Отступ для левой панели */}
-        <div 
-          className={styles.datesSpacer} 
+        <div
+          className={styles.datesSpacer}
           style={{ width: `${LEFT_PANEL_WIDTH}px` }}
         ></div>
-        
+
         {/* Даты */}
         <div className={styles.datesContainer}>
           {Array.from({ length: days }, (_, i) => {
             const date = addDays(minDate, i);
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
             const isFirstOfMonth = date.getDate() === 1;
-            
+
             return (
-              <div 
-                key={i} 
-                className={`${styles.dateCell} ${isWeekend ? styles.weekend : ''} ${isFirstOfMonth ? styles.firstOfMonth : ''}`}
+              <div
+                key={i}
+                className={`${styles.dateCell} ${
+                  isWeekend ? styles.weekend : ""
+                } ${isFirstOfMonth ? styles.firstOfMonth : ""}`}
                 style={{ width: `${DAY_WIDTH}px` }}
               >
                 <div className={styles.dayNumber}>{date.getDate()}</div>
@@ -73,12 +82,12 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
   // Отрисовка сетки
   const renderGrid = () => {
     return Array.from({ length: days }, (_, i) => (
-      <div 
+      <div
         key={i}
         className={styles.gridLine}
-        style={{ 
-          left: `${LEFT_PANEL_WIDTH + (i * DAY_WIDTH)}px`,
-          width: `${DAY_WIDTH}px`
+        style={{
+          left: `${LEFT_PANEL_WIDTH + i * DAY_WIDTH}px`,
+          width: `${DAY_WIDTH}px`,
         }}
       />
     ));
@@ -88,27 +97,30 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
   const renderTask = (task, level = 0) => {
     const isExpanded = expandedTasks.has(task.id);
     const hasChildren = task.children && task.children.length > 0;
-    
+
     const startOffset = getDayOffset(new Date(task.startDate), minDate);
-    const duration = getDayOffset(new Date(task.endDate), new Date(task.startDate)) + 1;
-    
+    const duration =
+      getDayOffset(new Date(task.endDate), new Date(task.startDate)) + 1;
+
     const taskLeft = startOffset * DAY_WIDTH;
     const taskWidth = duration * DAY_WIDTH;
 
     return (
       <div key={task.id} className={styles.taskRowWrapper}>
-        <div 
-          className={`${styles.taskRow} ${selectedTaskId === task.id ? styles.selected : ''}`}
+        <div
+          className={`${styles.taskRow} ${
+            selectedTaskId === task.id ? styles.selected : ""
+          }`}
           onClick={() => setSelectedTaskId(task.id)}
         >
           {/* Левая панель - фиксированная */}
-          <div 
+          <div
             className={styles.taskInfo}
             style={{ width: `${LEFT_PANEL_WIDTH}px` }}
           >
             <div className={styles.taskInfoContent}>
               {/* Кнопка развертывания */}
-              <button 
+              <button
                 className={styles.expandButton}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -116,60 +128,65 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
                 }}
                 disabled={!hasChildren}
               >
-                {hasChildren ? (isExpanded ? '−' : '+') : '•'}
+                {hasChildren ? (isExpanded ? "−" : "+") : "•"}
               </button>
-              
+
               {/* Кругляшок статуса проверки */}
-              <div 
+              <div
                 className={styles.reviewerStatus}
                 data-status={task.reviewerStatus}
                 title={getReviewerStatusTitle(task.reviewerStatus)}
               />
-              
-              <span 
+
+              <span
                 className={styles.taskTitle}
                 style={{ paddingLeft: `${level * 12}px` }}
               >
                 {task.title}
               </span>
-              
+
               <div className={styles.taskActions}>
-                {/* Кнопка комментариев - ОТКРЫВАЕТ CommentsModal */}
-                <button 
-                  className={styles.commentButton}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onShowComments(task); // Вызываем функцию для показа комментариев
-                  }}
+                <button
+                  onClick={() => onTaskStatusClick?.(task)}
+                  title="Изменить статус"
+                >
+                  📊
+                </button>
+                <button
+                  onClick={() => onAssignClick?.(task)}
+                  title="Назначить исполнителей"
+                >
+                  👥
+                </button>
+                <button
+                  onClick={() => onShowComments(task)}
                   title="Комментарии"
                 >
                   💬 {task.comments?.length || 0}
                 </button>
-                
-                {/* Остальные кнопки */}
-                <button onClick={(e) => {
-                  e.stopPropagation();
-                  onAddSubtask(task.id);
-                }}>+</button>
-                <button onClick={(e) => {
-                  e.stopPropagation();
-                  onTaskEdit(task);
-                }}>✏️</button>
-                <button onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteTask(task.id);
-                }}>🗑️</button>
+                <button
+                  onClick={() => onAddSubtask(task.id)}
+                  title="Добавить подзадачу"
+                >
+                  +
+                </button>
+                <button onClick={() => onTaskEdit(task)} title="Редактировать">
+                  ✏️
+                </button>
+                <button onClick={() => onDeleteTask(task.id)} title="Удалить">
+                  🗑️
+                </button>
               </div>
             </div>
           </div>
-          
+
           {/* Правая панель - скроллируется */}
           <div className={styles.timelineArea}>
-            <div 
+            <div
               className={styles.taskBar}
               style={{
                 left: `${taskLeft}px`,
-                width: `${taskWidth}px`
+                width: `${taskWidth}px`,
               }}
               data-status={task.status}
               data-level={level}
@@ -180,11 +197,11 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
             </div>
           </div>
         </div>
-        
+
         {/* Дочерние задачи */}
         {isExpanded && hasChildren && (
           <div className={styles.children}>
-            {task.children.map(child => renderTask(child, level + 1))}
+            {task.children.map((child) => renderTask(child, level + 1))}
           </div>
         )}
       </div>
@@ -192,7 +209,7 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
   };
 
   const toggleTask = (taskId) => {
-    setExpandedTasks(prev => {
+    setExpandedTasks((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(taskId)) {
         newSet.delete(taskId);
@@ -204,31 +221,28 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
   };
 
   // Общая ширина холста
-  const canvasWidth = LEFT_PANEL_WIDTH + (days * DAY_WIDTH);
+  const canvasWidth = LEFT_PANEL_WIDTH + days * DAY_WIDTH;
 
   return (
     <div className={styles.ganttChart}>
       {/* ТОЛЬКО заголовок "Задачи" фиксированный */}
       <div className={styles.fixedHeader}>
-        <div 
+        <div
           className={styles.taskHeader}
           style={{ width: `${LEFT_PANEL_WIDTH}px` }}
         >
           Задачи
         </div>
       </div>
-      
+
       {/* ВСЁ остальное - даты и задачи - в одном скроллящемся контейнере */}
       <div className={styles.scrollContainer}>
         <div className={styles.canvas} style={{ width: `${canvasWidth}px` }}>
-          
           {/* Даты - ПЕРВАЯ СТРОКА ХОЛСТА */}
           {renderDatesRow()}
-          
+
           {/* Сетка - ТОЧНО под датами */}
-          <div className={styles.grid}>
-            {renderGrid()}
-          </div>
+          <div className={styles.grid}>{renderGrid()}</div>
 
           {/* Задачи */}
           <div className={styles.tasksContainer}>
@@ -237,7 +251,7 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
                 <p>Нет задач. Добавьте первую задачу!</p>
               </div>
             ) : (
-              tasks.map(task => renderTask(task))
+              tasks.map((task) => renderTask(task))
             )}
           </div>
         </div>
@@ -249,19 +263,19 @@ const GanttChart = ({ tasks, onTaskSelect, onTaskEdit, onAddSubtask, onDeleteTas
 // Вспомогательные функции для статусов
 const getStatusText = (status) => {
   const statusMap = {
-    'Planned': 'Запланировано',
-    'In process': 'В процессе',
-    'Completed': 'Завершено',
-    'Delayed': 'Отложено'
+    Planned: "Запланировано",
+    "In process": "В процессе",
+    Completed: "Завершено",
+    Delayed: "Отложено",
   };
   return statusMap[status] || status;
 };
 
 const getReviewerStatusTitle = (reviewerStatus) => {
   const titleMap = {
-    'None': 'Не проверялась',
-    'Accepted': 'Принята проверяющим',
-    'Rejected': 'Отклонена проверяющим'
+    None: "Не проверялась",
+    Accepted: "Принята проверяющим",
+    Rejected: "Отклонена проверяющим",
   };
   return titleMap[reviewerStatus] || reviewerStatus;
 };
@@ -269,16 +283,16 @@ const getReviewerStatusTitle = (reviewerStatus) => {
 // Вспомогательные функции (остаются те же)
 const getAllDates = (tasks) => {
   const dates = [];
-  
+
   const processTask = (task) => {
     if (task.startDate) dates.push(new Date(task.startDate).getTime());
     if (task.endDate) dates.push(new Date(task.endDate).getTime());
-    
+
     if (task.children) {
       task.children.forEach(processTask);
     }
   };
-  
+
   tasks.forEach(processTask);
   return dates.length > 0 ? dates : [new Date().getTime()];
 };
@@ -294,7 +308,20 @@ const addDays = (date, days) => {
 };
 
 const getMonthName = (date) => {
-  const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
+  const months = [
+    "Янв",
+    "Фев",
+    "Мар",
+    "Апр",
+    "Май",
+    "Июн",
+    "Июл",
+    "Авг",
+    "Сен",
+    "Окт",
+    "Ноя",
+    "Дек",
+  ];
   return months[date.getMonth()];
 };
 
