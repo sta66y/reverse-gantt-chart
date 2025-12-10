@@ -6,9 +6,12 @@ const GanttChart = ({
   tasks,
   onTaskSelect,
   onTaskEdit,
+  onTaskStatusChange,
+  onReviewerStatusChange,
   onAddSubtask,
   onDeleteTask,
   onShowComments,
+  onTaskAssign
 }) => {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [expandedTasks, setExpandedTasks] = useState(new Set());
@@ -93,6 +96,26 @@ const GanttChart = ({
     ));
   };
 
+  // Функции для получения иконок статусов
+  const getStatusIcon = (status) => {
+    const icons = {
+      Planned: "📅",
+      "In process": "⚙️",
+      Completed: "✅",
+      Delayed: "⏸️",
+    };
+    return icons[status] || "📋";
+  };
+
+  const getReviewerStatusIcon = (reviewerStatus) => {
+    const icons = {
+      None: "👁️",
+      Accepted: "👍",
+      Rejected: "👎",
+    };
+    return icons[reviewerStatus] || "❓";
+  };
+
   // Отрисовка задачи
   const renderTask = (task, level = 0) => {
     const isExpanded = expandedTasks.has(task.id);
@@ -146,35 +169,81 @@ const GanttChart = ({
               </span>
 
               <div className={styles.taskActions}>
+                {/* Кнопка комментариев */}
                 <button
-                  onClick={() => onTaskStatusClick?.(task)}
-                  title="Изменить статус"
-                >
-                  📊
-                </button>
-                <button
-                  onClick={() => onAssignClick?.(task)}
-                  title="Назначить исполнителей"
-                >
-                  👥
-                </button>
-                <button
-                  onClick={() => onShowComments(task)}
+                  className={styles.commentButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShowComments(task);
+                  }}
                   title="Комментарии"
                 >
                   💬 {task.comments?.length || 0}
                 </button>
+
+                {/* Кнопка изменения статуса задачи */}
                 <button
-                  onClick={() => onAddSubtask(task.id)}
+                  className={styles.statusButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTaskStatusChange(task);
+                  }}
+                  title="Изменить статус задачи"
+                  data-status={task.status}
+                >
+                  {getStatusIcon(task.status)}
+                </button>
+
+                {/* Кнопка изменения статуса проверки */}
+                <button
+                  className={styles.reviewerButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReviewerStatusChange(task);
+                  }}
+                  title="Изменить статус проверки"
+                  data-reviewer-status={task.reviewerStatus}
+                >
+                  {getReviewerStatusIcon(task.reviewerStatus)}
+                </button>
+
+                {/* Кнопка добавления подзадачи */}
+                <button
+                  className={styles.actionButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onAddSubtask(task.id);
+                  }}
                   title="Добавить подзадачу"
                 >
                   +
                 </button>
+
                 <button onClick={() => onTaskEdit(task)} title="Редактировать">
                   ✏️
                 </button>
-                <button onClick={() => onDeleteTask(task.id)} title="Удалить">
+
+                {/* Кнопка удаления */}
+                <button
+                  className={styles.actionButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteTask(task.id);
+                  }}
+                  title="Удалить"
+                >
                   🗑️
+                </button>
+                {/* В TaskActions добавьте кнопку назначения */}
+                <button
+                  className={styles.assignButton}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTaskAssign && onTaskAssign(task);
+                  }}
+                  title="Назначить задачу"
+                >
+                  👥
                 </button>
               </div>
             </div>
@@ -280,7 +349,7 @@ const getReviewerStatusTitle = (reviewerStatus) => {
   return titleMap[reviewerStatus] || reviewerStatus;
 };
 
-// Вспомогательные функции (остаются те же)
+// Вспомогательные функции для дат
 const getAllDates = (tasks) => {
   const dates = [];
 

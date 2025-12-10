@@ -1,0 +1,322 @@
+/* ReviewerStatusModal.module.css */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 450px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e9ecef;
+  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+  border-radius: 12px 12px 0 0;
+  color: white;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modalBody {
+  padding: 24px;
+}
+
+.taskInfo {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.taskInfo h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.taskDescription {
+  margin: 0;
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #20c997;
+}
+
+.currentStatus {
+  margin-bottom: 24px;
+}
+
+.currentStatus h4 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #555;
+  font-weight: 600;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.statusBadge[style*="#28a745"] {
+  animation: successPulse 2s infinite;
+}
+
+@keyframes successPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(40, 167, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+  }
+}
+
+.statusBadge[style*="#dc3545"] {
+  animation: errorPulse 2s infinite;
+}
+
+@keyframes errorPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+}
+
+.statusOptions h4 {
+  margin: 0 0 16px 0;
+  font-size: 1rem;
+  color: #555;
+  font-weight: 600;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+@media (max-width: 480px) {
+  .optionsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statusOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  width: 100%;
+}
+
+.statusOption:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.statusOption.selected {
+  background: #f8f9ff;
+  border-color: #20c997;
+  box-shadow: 0 4px 12px rgba(32, 201, 151, 0.2);
+  transform: translateY(-2px);
+}
+
+.statusIcon {
+  font-size: 2rem;
+  margin-bottom: 4px;
+}
+
+.statusLabel {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 20px 24px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-radius: 0 0 12px 12px;
+}
+
+.cancelButton {
+  padding: 10px 24px;
+  border: 1px solid #6c757d;
+  background: white;
+  color: #6c757d;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: #6c757d;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.saveButton {
+  padding: 10px 24px;
+  border: none;
+  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(32, 201, 151, 0.2);
+}
+
+.saveButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(32, 201, 151, 0.3);
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #6c757d;
+}
+
+/* Специфичные стили для статусов проверки */
+.statusOption[style*="#28a745"]:hover {
+  border-color: #28a745;
+}
+
+.statusOption[style*="#28a745"].selected {
+  background: #e8f5e9;
+  border-color: #28a745;
+}
+
+.statusOption[style*="#dc3545"]:hover {
+  border-color: #dc3545;
+}
+
+.statusOption[style*="#dc3545"].selected {
+  background: #ffebee;
+  border-color: #dc3545;
+}
+
+.statusOption[style*="#6c757d"]:hover {
+  border-color: #6c757d;
+}
+
+.statusOption[style*="#6c757d"].selected {
+  background: #f8f9fa;
+  border-color: #6c757d;
+}
+
+/* Стили для иконок статусов проверки */
+.statusOption[style*="#28a745"] .statusIcon {
+  filter: drop-shadow(0 2px 3px rgba(40, 167, 69, 0.3));
+}
+
+.statusOption[style*="#dc3545"] .statusIcon {
+  filter: drop-shadow(0 2px 3px rgba(220, 53, 69, 0.3));
+}
+
+.statusOption[style*="#6c757d"] .statusIcon {
+  filter: drop-shadow(0 2px 3px rgba(108, 117, 125, 0.3));
+}

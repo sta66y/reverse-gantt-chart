@@ -7,6 +7,9 @@ import TaskModal from "../../components/ui/TaskModal";
 import CommentsModal from "../../components/ui/CommentsModal";
 import styles from "./Project.module.css";
 import { useNotification } from "../../contexts/NotificationContext";
+import ReviewerStatusModal from "../../components/ui/ReviewerStatusModal";
+import TaskStatusModal from "../../components/ui/TaskStatusModal";
+import TaskAssignModal from "../../components/ui/TaskAssignModal/TaskAssignModal";
 
 const Project = () => {
   const apiAddress = import.meta.env.VITE_API_ADDRESS;
@@ -53,6 +56,12 @@ const Project = () => {
   const [userToEditRole, setUserToEditRole] = useState(null);
   const [selectedRole, setSelectedRole] = useState("");
 
+  const [isTaskStatusModalOpen, setIsTaskStatusModalOpen] = useState(false);
+  const [isReviewerStatusModalOpen, setIsReviewerStatusModalOpen] =
+    useState(false);
+
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+
   // Тестовые данные пользователей проекта
   // setProjectUsers([
   //   { email: 'project.manager@company.com', role: 'Менеджер' },
@@ -64,6 +73,25 @@ const Project = () => {
   //   { email: 'stakeholder@company.com', role: 'Владелец' },
   //   { email: 'devops@company.com', role: 'Разработчик' },
   // ]);
+  const handleTaskAssign = (task) => {
+    setSelectedTask(task);
+    setIsAssignModalOpen(true);
+  };
+
+  const handleTaskStatusChange = (task) => {
+    setSelectedTask(task);
+    setIsTaskStatusModalOpen(true);
+  };
+
+  const handleReviewerStatusChange = (task) => {
+    setSelectedTask(task);
+    setIsReviewerStatusModalOpen(true);
+  };
+
+  const handleStatusUpdate = (updatedTask) => {
+    // Обновляем задачу после изменения статуса
+    getProjectTasks();
+  };
 
   useEffect(() => {
     //const mockTasks = generateMockTasks();
@@ -116,10 +144,6 @@ const Project = () => {
       });
     }
   };
-
-
-
-  
 
   // Добавьте эту функцию после других функций get:
   const getProjectTasks = async () => {
@@ -559,56 +583,58 @@ const Project = () => {
 
   // Функция для добавления комментария
   // В Project.jsx убедитесь что функция handleAddComment выглядит так:
-const handleAddComment = async (taskId, commentText) => {
-  if (!commentText.trim()) return;
-  
-  try {
-    const response = await fetch(apiAddress + "comment/create", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        projectComponentId: parseInt(taskId),
-        comment: commentText
-      }),
-    });
+  const handleAddComment = async (taskId, commentText) => {
+    if (!commentText.trim()) return;
 
-    if (response.ok) {
-      const newComment = await response.json();
-      console.log("Комментарий создан:", newComment);
-      
-      // Обновляем задачи с новым комментарием
-      await getProjectTasks();
-      
-      // Обновляем также taskForComments если он открыт
-      if (taskForComments && taskForComments.id === taskId) {
-        // Обновляем локально для мгновенного отображения
-        setTaskForComments(prev => ({
-          ...prev,
-          comments: [...(prev.comments || []), {
-            id: newComment.id?.toString(),
-            comment: newComment.comment,
-            commenter: newComment.commenter,
-            createdAt: newComment.createdAt
-          }]
-        }));
-      }
-      
-    } else {
-      const errorData = await response.json();
-      showError?.({
-        message: errorData.message || "Ошибка добавления комментария",
-        code: response.status,
+    try {
+      const response = await fetch(apiAddress + "comment/create", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectComponentId: parseInt(taskId),
+          comment: commentText,
+        }),
       });
+
+      if (response.ok) {
+        const newComment = await response.json();
+        console.log("Комментарий создан:", newComment);
+
+        // Обновляем задачи с новым комментарием
+        await getProjectTasks();
+
+        // Обновляем также taskForComments если он открыт
+        if (taskForComments && taskForComments.id === taskId) {
+          // Обновляем локально для мгновенного отображения
+          setTaskForComments((prev) => ({
+            ...prev,
+            comments: [
+              ...(prev.comments || []),
+              {
+                id: newComment.id?.toString(),
+                comment: newComment.comment,
+                commenter: newComment.commenter,
+                createdAt: newComment.createdAt,
+              },
+            ],
+          }));
+        }
+      } else {
+        const errorData = await response.json();
+        showError?.({
+          message: errorData.message || "Ошибка добавления комментария",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      showError?.({
+        message: "Ошибка соединения при добавлении комментария",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
     }
-  } catch (err) {
-    showError?.({
-      message: "Ошибка соединения при добавлении комментария",
-      code: "NETWORK_ERROR",
-    });
-    console.error(err);
-  }
-};
+  };
   const handleAddTask = (parentId = null) => {
     setSelectedTask({ parentId });
     setIsModalOpen(true);
@@ -619,18 +645,17 @@ const handleAddComment = async (taskId, commentText) => {
       if (taskData.id) {
         // Обновление существующей задачи
         const response = await fetch(
-          apiAddress + "projectComponent/action/update", // TODO: Проверить endpoint для обновления
+          apiAddress + "projectComponent/action/update?projectId=" + projectId, // TODO: Проверить endpoint для обновления
           {
-            method: "PUT",
+            method: "PATCH",
             credentials: "include",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              id: parseInt(taskData.id),
+              componentId: parseInt(taskData.id),
               title: taskData.title,
               description: taskData.description,
               startDate: taskData.startDate,
               deadline: taskData.endDate,
-              parentId: taskData.parentId ? parseInt(taskData.parentId) : null,
             }),
           }
         );
@@ -711,8 +736,27 @@ const handleAddComment = async (taskId, commentText) => {
     }
   };
 
-  const handleDeleteTask = (taskId) => {
-    setTasks((prev) => deleteTaskFromTree(prev, taskId));
+  const handleDeleteTask = async (taskId) => {
+    const response = await fetch(
+      apiAddress +
+        "projectComponent/action/delete?projectId=" +
+        projectId +
+        "&componentId=" +
+        taskId,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    if (response.ok) {
+      setTasks((prev) => deleteTaskFromTree(prev, taskId));
+    } else {
+      showError({
+        message: "Не удалось удалить таску",
+        code: response.status,
+      });
+    }
   };
 
   const updateTaskInTree = (tasks, updatedTask) => {
@@ -869,7 +913,6 @@ const handleAddComment = async (taskId, commentText) => {
           </div>
         </div>
       </header>
-
       <main className={styles.main}>
         {viewMode === "gantt" ? (
           <GanttChart
@@ -882,6 +925,9 @@ const handleAddComment = async (taskId, commentText) => {
             onAddSubtask={handleAddTask}
             onDeleteTask={handleDeleteTask}
             onShowComments={handleShowComments}
+            onTaskStatusChange={handleTaskStatusChange}
+            onReviewerStatusChange={handleReviewerStatusChange}
+            onTaskAssign={handleTaskAssign}
           />
         ) : viewMode === "tree" ? (
           <TaskTree
@@ -894,6 +940,9 @@ const handleAddComment = async (taskId, commentText) => {
             onAddSubtask={handleAddTask}
             onDeleteTask={handleDeleteTask}
             onShowComments={handleShowComments}
+            onTaskStatusChange={handleTaskStatusChange}
+            onReviewerStatusChange={handleReviewerStatusChange}
+            onTaskAssign={handleTaskAssign}
           />
         ) : (
           <div className={styles.usersView}>
@@ -976,7 +1025,6 @@ const handleAddComment = async (taskId, commentText) => {
           </div>
         )}
       </main>
-
       {/* Модальное окно комментариев */}
       {isCommentsModalOpen && taskForComments && (
         <CommentsModal
@@ -988,7 +1036,6 @@ const handleAddComment = async (taskId, commentText) => {
           onAddComment={handleAddComment}
         />
       )}
-
       {isEditModalOpen && (
         <div
           className={styles.modalOverlay}
@@ -1094,7 +1141,6 @@ const handleAddComment = async (taskId, commentText) => {
           </div>
         </div>
       )}
-
       {isProjectInfoOpen && (
         <div className={styles.modalOverlay} onClick={handleCloseProjectInfo}>
           <div
@@ -1172,7 +1218,6 @@ const handleAddComment = async (taskId, commentText) => {
           </div>
         </div>
       )}
-
       {/* Модальное окно редактирования задачи (БЕЗ комментариев) */}
       {isModalOpen && (
         <TaskModal
@@ -1184,7 +1229,6 @@ const handleAddComment = async (taskId, commentText) => {
           }}
         />
       )}
-
       {/* Модальное окно добавления пользователя */}
       {isAddUserModalOpen && (
         <div
@@ -1272,7 +1316,6 @@ const handleAddComment = async (taskId, commentText) => {
           </div>
         </div>
       )}
-
       {/* Модальное окно подтверждения удаления пользователя */}
       {userToDelete && (
         <div
@@ -1320,7 +1363,6 @@ const handleAddComment = async (taskId, commentText) => {
           </div>
         </div>
       )}
-
       {/* Модальное окно изменения роли пользователя */}
       {userToEditRole && (
         <div
@@ -1390,6 +1432,42 @@ const handleAddComment = async (taskId, commentText) => {
             </div>
           </div>
         </div>
+      )}
+      {isTaskStatusModalOpen && selectedTask && (
+        <TaskStatusModal
+          task={selectedTask}
+          onClose={() => {
+            setIsTaskStatusModalOpen(false);
+            setSelectedTask(null);
+          }}
+          onStatusChange={handleStatusUpdate}
+          apiAddress={apiAddress}
+          projectId={projectId}
+        />
+      )}
+      {isReviewerStatusModalOpen && selectedTask && (
+        <ReviewerStatusModal
+          task={selectedTask}
+          onClose={() => {
+            setIsReviewerStatusModalOpen(false);
+            setSelectedTask(null);
+          }}
+          onStatusChange={handleStatusUpdate}
+          apiAddress={apiAddress}
+          projectId={projectId}
+        />
+      )}
+      {isAssignModalOpen && selectedTask && (
+        <TaskAssignModal
+          task={selectedTask}
+          projectId={projectId}
+          apiAddress={apiAddress}
+          onClose={() => {
+            setIsAssignModalOpen(false);
+            setSelectedTask(null);
+          }}
+          onAssignChange={handleStatusUpdate}
+        />
       )}
     </div>
   );
