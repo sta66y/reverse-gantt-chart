@@ -4,6 +4,7 @@ import styles from './Projects.module.css';
 import Header from '../../components/ui/Header';
 import Button from '../../components/ui/Button';
 import ProjectCard from '../../components/ui/ProjectCard';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const Projects = () => {
   const apiAddress = import.meta.env.VITE_API_ADDRESS;
@@ -17,6 +18,8 @@ const Projects = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalErrors, setModalErrors] = useState({});
+
+  const { showError } = useNotification();
 
   const navigate = useNavigate();
 

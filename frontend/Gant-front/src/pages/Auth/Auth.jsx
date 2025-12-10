@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './Auth.module.css';
 import Button from '../../components/ui/Button';
 import Header from '../../components/ui/Header/Header';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const Auth = () => {
 
@@ -25,6 +26,8 @@ const Auth = () => {
   
   // Состояние для ошибок от API
   const [apiError, setApiError] = useState('');
+
+  const { showError } = useNotification();
   
   const navigate = useNavigate();
 
@@ -100,12 +103,17 @@ const Auth = () => {
       }
       else  {
         // Имитация ошибки от сервера
-        throw new Error('Неверный email или пароль');
+        throw new Error('Неверный email или пароль, либо пользователь уже существует');
       }
       
     } catch (error) {
       // Обрабатываем ошибки
       setApiError(error.message || 'Произошла ошибка при авторизации');
+
+      showError({
+        message: error.message,
+        code: "unknown"
+      })
     } finally {
       // Завершаем загрузку в любом случае
       setLoading(false);

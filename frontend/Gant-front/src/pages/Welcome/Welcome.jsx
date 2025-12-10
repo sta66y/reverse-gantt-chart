@@ -2,7 +2,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Welcome.module.css";
 import Button from "../../components/ui/Button";
+import { useNotification } from "../../contexts/NotificationContext";
 export default function Welcome() {
+
+  const { showError } = useNotification();
+
   const navigate = useNavigate();
 
   const handleStart = () => {

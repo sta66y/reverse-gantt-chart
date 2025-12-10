@@ -1,56 +1,86 @@
 // pages/Project/Project.jsx
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import GanttChart from '../../components/ui/GanttChart';
-import TaskTree from '../../components/ui/TaskTree';
-import TaskModal from '../../components/ui/TaskModal';
-import CommentsModal from '../../components/ui/CommentsModal'
-import styles from './Project.module.css';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import GanttChart from "../../components/ui/GanttChart";
+import TaskTree from "../../components/ui/TaskTree";
+import TaskModal from "../../components/ui/TaskModal";
+import CommentsModal from "../../components/ui/CommentsModal";
+import styles from "./Project.module.css";
+import { useNotification } from "../../contexts/NotificationContext";
 
 const Project = () => {
   const apiAddress = import.meta.env.VITE_API_ADDRESS;
   const { projectId } = useParams();
   const navigate = useNavigate();
-  
+
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
   const [projectDeadline, setProjectDeadline] = useState(null);
   const [projectCreatedDate, setProjectCreatedDate] = useState(null);
   const [projectUpdatedDate, setProjectUpdatedDate] = useState(null);
   const [projectOwnerEmail, setProjectOwnerEmail] = useState(null);
+  const [projectUsers, setProjectUsers] = useState([]);
+
   const [tasks, setTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState('gantt'); // 'gantt', 'tree', 'users'
-  
+  const [viewMode, setViewMode] = useState("gantt"); // 'gantt', 'tree', 'users'
+
   const [isProjectInfoOpen, setIsProjectInfoOpen] = useState(false);
   const [isCommentsModalOpen, setIsCommentsModalOpen] = useState(false); // НОВОЕ состояние
   const [taskForComments, setTaskForComments] = useState(null); // Задача для комментариев
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editProjectData, setEditProjectData] = useState({
+    projectName: "",
+    projectDescription: "",
+    deadline: "",
+  });
+  const [editErrors, setEditErrors] = useState({});
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+
+  const { showError } = useNotification();
+
+  // Добавьте в состояние:
+  const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [newUserData, setNewUserData] = useState({
+    email: "",
+    userRole: "ROLE_STUDENT",
+  });
+  const [addUserErrors, setAddUserErrors] = useState({});
+  const [isAddingUser, setIsAddingUser] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [userToEditRole, setUserToEditRole] = useState(null);
+  const [selectedRole, setSelectedRole] = useState("");
+
   // Тестовые данные пользователей проекта
-  const projectUsers = [
-    { id: 1, email: 'project.manager@company.com', role: 'Менеджер' },
-    { id: 2, email: 'frontend.dev@company.com', role: 'Разработчик' },
-    { id: 3, email: 'backend.dev@company.com', role: 'Разработчик' },
-    { id: 4, email: 'designer.anna@company.com', role: 'Дизайнер' },
-    { id: 5, email: 'analyst.maria@company.com', role: 'Аналитик' },
-    { id: 6, email: 'qa.sergey@company.com', role: 'Тестировщик' },
-    { id: 7, email: 'stakeholder@company.com', role: 'Владелец' },
-    { id: 8, email: 'devops@company.com', role: 'Разработчик' },
-  ];
+  // setProjectUsers([
+  //   { email: 'project.manager@company.com', role: 'Менеджер' },
+  //   { email: 'frontend.dev@company.com', role: 'Разработчик' },
+  //   { email: 'backend.dev@company.com', role: 'Разработчик' },
+  //   { email: 'designer.anna@company.com', role: 'Дизайнер' },
+  //   { email: 'analyst.maria@company.com', role: 'Аналитик' },
+  //   { email: 'qa.sergey@company.com', role: 'Тестировщик' },
+  //   { email: 'stakeholder@company.com', role: 'Владелец' },
+  //   { email: 'devops@company.com', role: 'Разработчик' },
+  // ]);
 
   useEffect(() => {
     const mockTasks = generateMockTasks();
     getProjectInfo();
+    getProjectUsers();
     setTasks(mockTasks);
   }, []);
 
   const getProjectInfo = async () => {
-    const response = await fetch(apiAddress + 'project/info' + "?projectId=" + projectId, {
-      method: 'GET',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' }
-    });
+    const response = await fetch(
+      apiAddress + "project/info" + "?projectId=" + projectId,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
     if (response.ok) {
       const data = await response.json();
@@ -66,29 +96,358 @@ const Project = () => {
     }
   };
   const deleteProject = async () => {
-    const response = await fetch(apiAddress + 'project/action/delete' + "?projectId=" + projectId, {
-      method: 'DELETE',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' }
-    });
+    const response = await fetch(
+      apiAddress + "project/action/delete" + "?projectId=" + projectId,
+      {
+        method: "DELETE",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
 
     if (response.ok) {
-      console.log("Текущий проект успешно удален")
+      console.log("Текущий проект успешно удален");
     } else {
       console.log("Не удалось удалить проект");
+      showError({
+        message: "Не удалось удалить проект",
+        code: response.status,
+      });
     }
-  }
+  };
+
+  const getProjectUsers = async () => {
+    const response = await fetch(
+      apiAddress + "membership/getAll" + "?projectId=" + projectId,
+      {
+        method: "GET",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+    if (response.ok) {
+      console.log("Пользователи проекта получены");
+      const data = await response.json();
+      const result = data.map((item) => {
+        return {
+          email: item.email,
+          role: item.userRole,
+        };
+      });
+      setProjectUsers(result);
+    } else {
+      console.log("Не удалось получить пользователей проекта");
+    }
+  };
 
   const handleDeleteProject = async () => {
-    console.log('Удаление проекта:', projectId);
+    console.log("Удаление проекта:", projectId);
     if (window.confirm(`Удалить проект "${projectName}"?`)) {
       await deleteProject();
       handleBackToProjects();
     }
   };
 
+  const handleAddUserClick = () => {
+    setNewUserData({
+      email: "",
+      userRole: "ROLE_STUDENT",
+    });
+    setAddUserErrors({});
+    setIsAddUserModalOpen(true);
+  };
+
+  // Валидация формы добавления пользователя
+  const validateAddUserForm = () => {
+    const errors = {};
+
+    if (!newUserData.email.trim()) {
+      errors.email = "Email обязателен";
+    } else if (!/\S+@\S+\.\S+/.test(newUserData.email)) {
+      errors.email = "Введите корректный email";
+    }
+
+    if (!newUserData.userRole) {
+      errors.userRole = "Роль обязательна";
+    }
+
+    setAddUserErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Функция добавления пользователя в проект
+  const handleAddUser = async () => {
+    if (!validateAddUserForm()) return;
+
+    setIsAddingUser(true);
+
+    try {
+      const response = await fetch(
+        apiAddress + "membership/action/add" + "?projectId=" + projectId,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: newUserData.email,
+            userRole: newUserData.userRole,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        // Обновляем список пользователей
+        await getProjectUsers();
+
+        // Закрываем модальное окно
+        setIsAddUserModalOpen(false);
+        setAddUserErrors({});
+
+        // Очищаем форму
+        setNewUserData({
+          email: "",
+          userRole: "ROLE_STUDENT",
+        });
+
+
+      } else {
+        const errorData = await response.json();
+        setAddUserErrors({
+          api: errorData.message || "Ошибка добавления пользователя",
+        });
+        showError?.({
+          message: errorData.message || "Ошибка добавления пользователя",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      setAddUserErrors({ api: "Ошибка соединения" });
+      showError?.({
+        message: "Ошибка соединения при добавлении пользователя",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    } finally {
+      setIsAddingUser(false);
+    }
+  };
+
+  // Функция для удаления пользователя из проекта
+  const handleDeleteUserClick = (user) => {
+    setUserToDelete(user);
+  };
+
+  const handleConfirmDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    try {
+      const response = await fetch(
+        apiAddress + "membership/action/remove" + "?projectId=" + projectId + "&email=" + userToDelete.email,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+
+      if (response.ok) {
+        // Обновляем список пользователей
+        await getProjectUsers();
+
+      } else {
+        const errorData = await response.json();
+        showError?.({
+          message: errorData.message || "Ошибка удаления пользователя",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      showError?.({
+        message: "Ошибка соединения при удалении пользователя",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    } finally {
+      setUserToDelete(null);
+    }
+  };
+
+  // Функция для изменения роли пользователя
+  const handleEditRoleClick = (user) => {
+    setUserToEditRole(user);
+    setSelectedRole(user.role);
+  };
+
+  const handleConfirmEditRole = async () => {
+    if (!userToEditRole || !selectedRole) return;
+
+    const getRequestRoleName = (role) => {
+      const roleRequestNames = {
+      ROLE_PLANNER: "PLANNER",
+      ROLE_REVIEWER: "REVIEWER",
+      ROLE_STUDENT: "STUDENT",
+      ROLE_VIEWER: "VIEWER",
+    };
+    return roleRequestNames[role] || "unknown";
+    }
+
+    try {
+      const response = await fetch(
+        apiAddress + "membership/action/updateAuthority" + "?projectId=" + projectId + "&email=" + userToEditRole.email + "&role=" + getRequestRoleName(selectedRole),
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" }
+        }
+      );
+
+      if (response.ok) {
+        // Обновляем список пользователей
+        await getProjectUsers();
+
+      } else {
+        const errorData = await response.json();
+        showError?.({
+          message: errorData.message || "Ошибка изменения роли",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      showError?.({
+        message: "Ошибка соединения при изменении роли",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    } finally {
+      setUserToEditRole(null);
+      setSelectedRole("");
+    }
+  };
+
+  // Обработчик изменения полей формы добавления пользователя
+  const handleNewUserInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewUserData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Очищаем ошибку при вводе
+    if (addUserErrors[name]) {
+      setAddUserErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  // Добавьте функцию для открытия модального окна редактирования:
+  const handleEditProject = () => {
+    // Заполняем форму текущими данными проекта
+    setEditProjectData({
+      projectName: projectName,
+      projectDescription: projectDescription || "",
+      deadline: projectDeadline
+        ? new Date(projectDeadline).toISOString().split("T")[0]
+        : "",
+    });
+    setEditErrors({});
+    setIsEditModalOpen(true);
+  };
+
+  // Функция валидации формы редактирования:
+  const validateEditForm = () => {
+    const errors = {};
+
+    if (!editProjectData.projectName.trim()) {
+      errors.projectName = "Название обязательно";
+    }
+
+    if (editProjectData.projectName.trim().length < 3) {
+      errors.projectName = "Название должно быть не менее 3 символов";
+    }
+
+    if (!editProjectData.projectDescription.trim()) {
+      errors.projectDescription = "Описание обязательно";
+    }
+
+    if (editProjectData.deadline) {
+      const deadlineDate = new Date(editProjectData.deadline);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (deadlineDate < today) {
+        errors.deadline = "Дедлайн не может быть в прошлом";
+      }
+    }
+
+    setEditErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // Функция для сохранения изменений:
+  const handleSaveProject = async () => {
+    if (!validateEditForm()) return;
+
+    setIsSubmittingEdit(true);
+
+    try {
+      const response = await fetch(
+        apiAddress + "project/action/update" + "?projectId=" + projectId,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectName: editProjectData.projectName,
+            projectDescription: editProjectData.projectDescription,
+            deadline: editProjectData.deadline || null,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        // Обновляем данные проекта
+        await getProjectInfo();
+
+        // Закрываем модальное окно
+        setIsEditModalOpen(false);
+        setEditErrors({});
+      } else {
+        const errorData = await response.json();
+        setEditErrors({
+          api: errorData.message || "Ошибка обновления проекта",
+        });
+        showError?.({
+          message: errorData.message || "Ошибка обновления проекта",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      setEditErrors({ api: "Ошибка соединения" });
+      showError?.({
+        message: "Ошибка соединения при обновлении проекта",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  };
+
+  // Обработчик изменения полей формы:
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditProjectData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Очищаем ошибку при вводе
+    if (editErrors[name]) {
+      setEditErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
   const handleBackToProjects = () => {
-    navigate('/projects');
+    navigate("/projects");
   };
 
   const handleShowProjectInfo = () => {
@@ -99,7 +458,6 @@ const Project = () => {
     setIsProjectInfoOpen(false);
   };
 
-
   const handleShowComments = (task) => {
     setTaskForComments(task);
     setIsCommentsModalOpen(true);
@@ -109,59 +467,58 @@ const Project = () => {
   const handleAddComment = (taskId, commentText) => {
     const newComment = {
       id: Date.now().toString(),
-      email: 'current.user@company.com', // Текущий пользователь
-      role: 'Разработчик', // Роль пользователя
+      email: "current.user@company.com", // Текущий пользователь
+      role: "Разработчик", // Роль пользователя
       text: commentText,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     // Обновляем задачу с новым комментарием
-    const updatedTasks = tasks.map(task => {
+    const updatedTasks = tasks.map((task) => {
       if (task.id === taskId) {
         return {
           ...task,
-          comments: [...(task.comments || []), newComment]
+          comments: [...(task.comments || []), newComment],
         };
       }
       // Также ищем в детях
       const updateChildren = (tasksArray) => {
-        return tasksArray.map(t => {
+        return tasksArray.map((t) => {
           if (t.id === taskId) {
             return {
               ...t,
-              comments: [...(t.comments || []), newComment]
+              comments: [...(t.comments || []), newComment],
             };
           }
           if (t.children) {
             return {
               ...t,
-              children: updateChildren(t.children)
+              children: updateChildren(t.children),
             };
           }
           return t;
         });
       };
-      
+
       if (task.children) {
         return {
           ...task,
-          children: updateChildren(task.children)
+          children: updateChildren(task.children),
         };
       }
       return task;
     });
 
     setTasks(updatedTasks);
-    
+
     // Обновляем также taskForComments если он открыт
     if (taskForComments && taskForComments.id === taskId) {
-      setTaskForComments(prev => ({
+      setTaskForComments((prev) => ({
         ...prev,
-        comments: [...(prev.comments || []), newComment]
+        comments: [...(prev.comments || []), newComment],
       }));
     }
   };
-  
 
   const handleAddTask = (parentId = null) => {
     setSelectedTask({ parentId });
@@ -170,18 +527,18 @@ const Project = () => {
 
   const handleSaveTask = (taskData) => {
     if (taskData.id) {
-      setTasks(prev => updateTaskInTree(prev, taskData));
+      setTasks((prev) => updateTaskInTree(prev, taskData));
     } else {
       const newTask = {
         id: Date.now().toString(),
         ...taskData,
-        children: []
+        children: [],
       };
-      
+
       if (taskData.parentId) {
-        setTasks(prev => addTaskToParent(prev, taskData.parentId, newTask));
+        setTasks((prev) => addTaskToParent(prev, taskData.parentId, newTask));
       } else {
-        setTasks(prev => [...prev, newTask]);
+        setTasks((prev) => [...prev, newTask]);
       }
     }
     setIsModalOpen(false);
@@ -189,38 +546,44 @@ const Project = () => {
   };
 
   const handleDeleteTask = (taskId) => {
-    setTasks(prev => deleteTaskFromTree(prev, taskId));
+    setTasks((prev) => deleteTaskFromTree(prev, taskId));
   };
 
   const updateTaskInTree = (tasks, updatedTask) => {
-    return tasks.map(task => {
+    return tasks.map((task) => {
       if (task.id === updatedTask.id) {
         return { ...task, ...updatedTask };
       }
       if (task.children) {
-        return { ...task, children: updateTaskInTree(task.children, updatedTask) };
+        return {
+          ...task,
+          children: updateTaskInTree(task.children, updatedTask),
+        };
       }
       return task;
     });
   };
 
   const addTaskToParent = (tasks, parentId, newTask) => {
-    return tasks.map(task => {
+    return tasks.map((task) => {
       if (task.id === parentId) {
         return { ...task, children: [...(task.children || []), newTask] };
       }
       if (task.children) {
-        return { ...task, children: addTaskToParent(task.children, parentId, newTask) };
+        return {
+          ...task,
+          children: addTaskToParent(task.children, parentId, newTask),
+        };
       }
       return task;
     });
   };
 
   const deleteTaskFromTree = (tasks, taskId) => {
-    return tasks.filter(task => {
+    return tasks.filter((task) => {
       if (task.id === taskId) {
         if (task.children && task.children.length > 0) {
-          alert('Нельзя удалить задачу с подзадачами!');
+          alert("Нельзя удалить задачу с подзадачами!");
           return true;
         }
         return false;
@@ -234,30 +597,39 @@ const Project = () => {
 
   const getRoleColor = (role) => {
     const roleColors = {
-      'Менеджер': '#ff6b6b',
-      'Разработчик': '#4ecdc4',
-      'Дизайнер': '#45b7d1',
-      'Аналитик': '#96ceb4',
-      'Тестировщик': '#feca57',
-      'Владелец': '#ee5a24'
+      ROLE_ADMIN: "#ff6b6b",
+      ROLE_PLANNER: "#4ecdc4",
+      ROLE_REVIEWER: "#45b7d1",
+      ROLE_STUDENT: "#96ceb4",
+      ROLE_VIEWER: "#feca57",
     };
-    return roleColors[role] || '#667eea';
+    return roleColors[role] || "#667eea";
+  };
+  const getRoleString = (role) => {
+    const roleStrings = {
+      ROLE_ADMIN: "Админ",
+      ROLE_PLANNER: "Планнер",
+      ROLE_REVIEWER: "Ревьюер",
+      ROLE_STUDENT: "Студент",
+      ROLE_VIEWER: "Гость",
+    };
+    return roleStrings[role] || "Неизвестный";
   };
 
   const getRoleStats = () => {
     const stats = {};
-    projectUsers.forEach(user => {
+    projectUsers.forEach((user) => {
       stats[user.role] = (stats[user.role] || 0) + 1;
     });
     return stats;
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'Не указана';
-    return new Date(dateString).toLocaleDateString('ru-RU', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
+    if (!dateString) return "Не указана";
+    return new Date(dateString).toLocaleDateString("ru-RU", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
   };
 
@@ -268,56 +640,62 @@ const Project = () => {
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           {/* НОВАЯ кнопка выхода из проекта */}
-          <button 
+          <button
             className={styles.exitButton}
             onClick={handleDeleteProject}
             title="Удалить проект"
           >
             Удалить проект
           </button>
+          <button
+            className={styles.editButton}
+            onClick={handleEditProject}
+            title="Редактировать проект"
+          >
+            Редактировать проект
+          </button>
 
-          <button 
+          <button
             className={styles.backButton}
             onClick={handleBackToProjects}
             title="Вернуться к проектам"
           >
             ← Назад к проектам
           </button>
-          <h1>{projectName || "Загрузка..."}</h1>
         </div>
-        
+        <h1>{projectName || "Загрузка..."}</h1>
         <div className={styles.headerRight}>
-          <button 
+          <button
             className={styles.infoButton}
             onClick={handleShowProjectInfo}
             title="Информация о проекте"
           >
             ℹ️ О проекте
           </button>
-          
+
           <div className={styles.controls}>
-            <button 
+            <button
               className={styles.addButton}
               onClick={() => handleAddTask()}
             >
               + Добавить задачу
             </button>
             <div className={styles.viewToggle}>
-              <button 
-                className={viewMode === 'gantt' ? styles.active : ''}
-                onClick={() => setViewMode('gantt')}
+              <button
+                className={viewMode === "gantt" ? styles.active : ""}
+                onClick={() => setViewMode("gantt")}
               >
                 Диаграмма Ганта
               </button>
-              <button 
-                className={viewMode === 'tree' ? styles.active : ''}
-                onClick={() => setViewMode('tree')}
+              <button
+                className={viewMode === "tree" ? styles.active : ""}
+                onClick={() => setViewMode("tree")}
               >
                 Дерево задач
               </button>
-              <button 
-                className={viewMode === 'users' ? styles.active : ''}
-                onClick={() => setViewMode('users')}
+              <button
+                className={viewMode === "users" ? styles.active : ""}
+                onClick={() => setViewMode("users")}
               >
                 Участники
               </button>
@@ -327,8 +705,8 @@ const Project = () => {
       </header>
 
       <main className={styles.main}>
-        {viewMode === 'gantt' ? (
-          <GanttChart 
+        {viewMode === "gantt" ? (
+          <GanttChart
             tasks={tasks}
             onTaskSelect={setSelectedTask}
             onTaskEdit={(task) => {
@@ -339,8 +717,8 @@ const Project = () => {
             onDeleteTask={handleDeleteTask}
             onShowComments={handleShowComments}
           />
-        ) : viewMode === 'tree' ? (
-          <TaskTree 
+        ) : viewMode === "tree" ? (
+          <TaskTree
             tasks={tasks}
             onTaskSelect={setSelectedTask}
             onTaskEdit={(task) => {
@@ -358,12 +736,14 @@ const Project = () => {
               <div className={styles.statsGrid}>
                 {Object.entries(roleStats).map(([role, count]) => (
                   <div key={role} className={styles.statCard}>
-                    <div 
+                    <div
                       className={styles.statColor}
                       style={{ backgroundColor: getRoleColor(role) }}
                     />
                     <div className={styles.statInfo}>
-                      <span className={styles.statRole}>{role}</span>
+                      <span className={styles.statRole}>
+                        {getRoleString(role)}
+                      </span>
                       <span className={styles.statCount}>{count} чел.</span>
                     </div>
                   </div>
@@ -372,32 +752,57 @@ const Project = () => {
             </div>
 
             <div className={styles.usersList}>
-              <h3>Все участники проекта</h3>
+              <div className={styles.usersHeader}>
+                <h3>Все участники проекта</h3>
+                <button
+                  className={styles.addUserButton}
+                  onClick={handleAddUserClick}
+                >
+                  + Добавить участника
+                </button>
+              </div>
               <div className={styles.usersTable}>
                 <div className={styles.tableHeader}>
                   <div className={styles.tableCell}>Email</div>
                   <div className={styles.tableCell}>Роль</div>
                   <div className={styles.tableCell}>Действия</div>
                 </div>
-                {projectUsers.map(user => (
-                  <div key={user.id} className={styles.tableRow}>
+                {projectUsers.map((user, index) => (
+                  <div
+                    key={`${user.email}-${index}`}
+                    className={styles.tableRow}
+                  >
                     <div className={styles.tableCell}>
                       <span className={styles.userEmail}>{user.email}</span>
                     </div>
                     <div className={styles.tableCell}>
-                      <span 
+                      <span
                         className={styles.userRole}
                         style={{ backgroundColor: getRoleColor(user.role) }}
                       >
-                        {user.role}
+                        {getRoleString(user.role)}
                       </span>
                     </div>
-                    <div className={styles.tableCell}>
+                    {user.email == projectOwnerEmail ? null : <div className={styles.tableCell}>
                       <div className={styles.userActions}>
-                        <button className={styles.actionButton}>Написать</button>
-                        <button className={styles.actionButton}>Профиль</button>
+                        <button
+                          className={styles.editRoleButton}
+                          onClick={() => handleEditRoleClick(user)}
+                          title="Изменить роль"
+                        >
+                          Изменить роль
+                        </button>
+                        <button
+                          className={styles.deleteButton}
+                          onClick={() => handleDeleteUserClick(user)}
+                          title="Удалить из проекта"
+                        >
+                          Удалить
+                        </button>
                       </div>
                     </div>
+                    }
+                    
                   </div>
                 ))}
               </div>
@@ -418,16 +823,128 @@ const Project = () => {
         />
       )}
 
-      {isProjectInfoOpen && (
-        <div className={styles.modalOverlay} onClick={handleCloseProjectInfo}>
-          <div className={styles.projectModal} onClick={e => e.stopPropagation()}>
+      {isEditModalOpen && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setIsEditModalOpen(false)}
+        >
+          <div
+            className={styles.editModal}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalHeader}>
-              <h2>Информация о проекте</h2>
-              <button className={styles.closeButton} onClick={handleCloseProjectInfo}>
+              <h2>Редактировать проект</h2>
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsEditModalOpen(false)}
+                disabled={isSubmittingEdit}
+              >
                 ✕
               </button>
             </div>
-            
+
+            <div className={styles.modalBody}>
+              {editErrors.api && (
+                <div className={styles.apiError}>{editErrors.api}</div>
+              )}
+
+              <div className={styles.formGroup}>
+                <label htmlFor="editProjectName">Название проекта *</label>
+                <input
+                  type="text"
+                  id="editProjectName"
+                  name="projectName"
+                  value={editProjectData.projectName}
+                  onChange={handleEditInputChange}
+                  placeholder="Введите название проекта"
+                  className={editErrors.projectName ? styles.inputError : ""}
+                  disabled={isSubmittingEdit}
+                />
+                {editErrors.projectName && (
+                  <span className={styles.errorText}>
+                    {editErrors.projectName}
+                  </span>
+                )}
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="editProjectDescription">Описание *</label>
+                <textarea
+                  id="editProjectDescription"
+                  name="projectDescription"
+                  value={editProjectData.projectDescription}
+                  onChange={handleEditInputChange}
+                  placeholder="Опишите проект"
+                  rows="4"
+                  className={
+                    editErrors.projectDescription ? styles.inputError : ""
+                  }
+                  disabled={isSubmittingEdit}
+                />
+                {editErrors.projectDescription && (
+                  <span className={styles.errorText}>
+                    {editErrors.projectDescription}
+                  </span>
+                )}
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="editProjectDeadline">
+                  Дедлайн (необязательно)
+                </label>
+                <input
+                  type="date"
+                  id="editProjectDeadline"
+                  name="deadline"
+                  value={editProjectData.deadline || ""}
+                  onChange={handleEditInputChange}
+                  className={editErrors.deadline ? styles.inputError : ""}
+                  disabled={isSubmittingEdit}
+                />
+                {editErrors.deadline && (
+                  <span className={styles.errorText}>
+                    {editErrors.deadline}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setIsEditModalOpen(false)}
+                disabled={isSubmittingEdit}
+              >
+                Отмена
+              </button>
+              <button
+                className={styles.saveButton}
+                onClick={handleSaveProject}
+                disabled={isSubmittingEdit}
+              >
+                {isSubmittingEdit ? "Сохранение..." : "Сохранить изменения"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isProjectInfoOpen && (
+        <div className={styles.modalOverlay} onClick={handleCloseProjectInfo}>
+          <div
+            className={styles.projectModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2>Информация о проекте</h2>
+              <button
+                className={styles.closeButton}
+                onClick={handleCloseProjectInfo}
+              >
+                ✕
+              </button>
+            </div>
+
             <div className={styles.modalBody}>
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Название:</span>
@@ -435,34 +952,38 @@ const Project = () => {
                   {projectName || "Разработка мобильного приложения"}
                 </span>
               </div>
-              
+
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Описание:</span>
                 <div className={styles.infoDescription}>
-                  {projectDescription || 
+                  {projectDescription ||
                     "Создание кроссплатформенного приложения для управления задачами с синхронизацией в реальном времени. " +
-                    "Проект включает разработку frontend и backend частей, интеграцию с внешними API и создание системы уведомлений."}
+                      "Проект включает разработку frontend и backend частей, интеграцию с внешними API и создание системы уведомлений."}
                 </div>
               </div>
-              
+
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Дедлайн:</span>
                 <span className={styles.infoValue}>
-                  {projectDeadline ? formatDate(projectDeadline) : "Не установлен"}
+                  {projectDeadline
+                    ? formatDate(projectDeadline)
+                    : "Не установлен"}
                 </span>
               </div>
-              
+
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Email владельца:</span>
                 <span className={styles.infoValue}>
                   {projectOwnerEmail || "Не установлен"}
                 </span>
               </div>
-              
+
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Дата создания:</span>
                 <span className={styles.infoValue}>
-                  {projectCreatedDate ? formatDate(projectCreatedDate) : "Нет редактирований"}
+                  {projectCreatedDate
+                    ? formatDate(projectCreatedDate)
+                    : "Нет редактирований"}
                 </span>
               </div>
 
@@ -472,12 +993,10 @@ const Project = () => {
                   {formatDate(projectUpdatedDate)}
                 </span>
               </div>
-              
-              
             </div>
-            
+
             <div className={styles.modalFooter}>
-              <button 
+              <button
                 className={styles.closeModalButton}
                 onClick={handleCloseProjectInfo}
               >
@@ -499,60 +1018,267 @@ const Project = () => {
           }}
         />
       )}
+
+      {/* Модальное окно добавления пользователя */}
+      {isAddUserModalOpen && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setIsAddUserModalOpen(false)}
+        >
+          <div
+            className={styles.addUserModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2>Добавить участника</h2>
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsAddUserModalOpen(false)}
+                disabled={isAddingUser}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {addUserErrors.api && (
+                <div className={styles.apiError}>{addUserErrors.api}</div>
+              )}
+
+              <div className={styles.formGroup}>
+                <label htmlFor="userEmail">Email участника *</label>
+                <input
+                  type="email"
+                  id="userEmail"
+                  name="email"
+                  value={newUserData.email}
+                  onChange={handleNewUserInputChange}
+                  placeholder="example@email.com"
+                  className={addUserErrors.email ? styles.inputError : ""}
+                  disabled={isAddingUser}
+                />
+                {addUserErrors.email && (
+                  <span className={styles.errorText}>
+                    {addUserErrors.email}
+                  </span>
+                )}
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="userRole">Роль в проекте *</label>
+                <select
+                  id="userRole"
+                  name="userRole"
+                  value={newUserData.userRole}
+                  onChange={handleNewUserInputChange}
+                  className={addUserErrors.userRole ? styles.inputError : ""}
+                  disabled={isAddingUser}
+                >
+                  <option value="ROLE_PLANNER">Планнер</option>
+                  <option value="ROLE_REVIEWER">Ревьюер</option>
+                  <option value="ROLE_STUDENT">Студент</option>
+                  <option value="ROLE_VIEWER">Гость</option>
+                </select>
+                {addUserErrors.userRole && (
+                  <span className={styles.errorText}>
+                    {addUserErrors.userRole}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setIsAddUserModalOpen(false)}
+                disabled={isAddingUser}
+              >
+                Отмена
+              </button>
+              <button
+                className={styles.saveButton}
+                onClick={handleAddUser}
+                disabled={isAddingUser}
+              >
+                {isAddingUser ? "Добавление..." : "Добавить"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно подтверждения удаления пользователя */}
+      {userToDelete && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setUserToDelete(null)}
+        >
+          <div
+            className={styles.confirmModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2>Подтверждение удаления</h2>
+              <button
+                className={styles.closeButton}
+                onClick={() => setUserToDelete(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <p>
+                Вы уверены, что хотите удалить пользователя{" "}
+                <strong>{userToDelete.email}</strong> из проекта?
+              </p>
+              <p className={styles.warningText}>
+                Это действие нельзя отменить.
+              </p>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setUserToDelete(null)}
+              >
+                Отмена
+              </button>
+              <button
+                className={styles.deleteConfirmButton}
+                onClick={handleConfirmDeleteUser}
+              >
+                Удалить
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно изменения роли пользователя */}
+      {userToEditRole && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setUserToEditRole(null)}
+        >
+          <div
+            className={styles.editRoleModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2>Изменение роли</h2>
+              <button
+                className={styles.closeButton}
+                onClick={() => setUserToEditRole(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <p>
+                Изменить роль для пользователя:{" "}
+                <strong>{userToEditRole.email}</strong>
+              </p>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="newRole">Новая роль</label>
+                <select
+                  id="newRole"
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className={styles.roleSelect}
+                >
+                  <option value="ROLE_PLANNER">Планнер</option>
+                  <option value="ROLE_REVIEWER">Ревьюер</option>
+                  <option value="ROLE_STUDENT">Студент</option>
+                  <option value="ROLE_VIEWER">Гость</option>
+                </select>
+              </div>
+
+              <div className={styles.currentRoleInfo}>
+                Текущая роль:{" "}
+                <span
+                  className={styles.currentRole}
+                  style={{ backgroundColor: getRoleColor(userToEditRole.role) }}
+                >
+                  {getRoleString(userToEditRole.role)}
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setUserToEditRole(null)}
+              >
+                Отмена
+              </button>
+              <button
+                className={styles.saveButton}
+                onClick={handleConfirmEditRole}
+                disabled={!selectedRole || selectedRole === userToEditRole.role}
+              >
+                Сохранить изменения
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 const generateMockTasks = () => [
   {
-    id: '1',
-    title: 'Разработка нового функционала',
-    description: 'Основная задача проекта',
-    startDate: '2024-01-01',
-    endDate: '2024-01-31',
-    status: 'In process',
-    reviewerStatus: 'Rejected',
+    id: "1",
+    title: "Разработка нового функционала",
+    description: "Основная задача проекта",
+    startDate: "2024-01-01",
+    endDate: "2024-01-31",
+    status: "In process",
+    reviewerStatus: "Rejected",
     children: [
       {
-        id: '2',
-        title: 'Проектирование архитектуры',
-        description: 'Создание технического задания',
-        startDate: '2024-01-01',
-        endDate: '2024-01-07',
-        status: 'Planned',
-        reviewerStatus: 'Accepted',
+        id: "2",
+        title: "Проектирование архитектуры",
+        description: "Создание технического задания",
+        startDate: "2024-01-01",
+        endDate: "2024-01-07",
+        status: "Planned",
+        reviewerStatus: "Accepted",
         children: [
           {
-            id: '3',
-            title: 'Анализ требований',
-            description: 'Сбор и анализ требований заказчика',
-            startDate: '2024-01-01',
-            endDate: '2024-01-03',
-            status: 'Completed',
-            reviewerStatus: 'Accepted'
-          }
-        ]
+            id: "3",
+            title: "Анализ требований",
+            description: "Сбор и анализ требований заказчика",
+            startDate: "2024-01-01",
+            endDate: "2024-01-03",
+            status: "Completed",
+            reviewerStatus: "Accepted",
+          },
+        ],
       },
       {
-        id: '4',
-        title: 'Фронтенд разработка',
-        description: 'Разработка пользовательского интерфейса',
-        startDate: '2024-01-08',
-        endDate: '2024-01-20',
-        status: 'In process',
-        reviewerStatus: 'None'
+        id: "4",
+        title: "Фронтенд разработка",
+        description: "Разработка пользовательского интерфейса",
+        startDate: "2024-01-08",
+        endDate: "2024-01-20",
+        status: "In process",
+        reviewerStatus: "None",
       },
       {
-        id: '5',
-        title: 'Задача с проблемами',
-        description: 'Задача требующая внимания',
-        startDate: '2024-01-10',
-        endDate: '2024-01-15',
-        status: 'Delayed',
-        reviewerStatus: 'Rejected'
-      }
-    ]
-  }
+        id: "5",
+        title: "Задача с проблемами",
+        description: "Задача требующая внимания",
+        startDate: "2024-01-10",
+        endDate: "2024-01-15",
+        status: "Delayed",
+        reviewerStatus: "Rejected",
+      },
+    ],
+  },
 ];
 
 export default Project;
