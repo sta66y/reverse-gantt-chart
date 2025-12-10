@@ -23,8 +23,8 @@
   background: white;
   border-radius: 12px;
   width: 90%;
-  max-width: 600px;
-  max-height: 80vh;
+  max-width: 700px;
+  max-height: 85vh;
   overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.3s ease;
@@ -80,7 +80,7 @@
 
 .modalBody {
   padding: 24px;
-  max-height: calc(80vh - 150px);
+  max-height: calc(85vh - 150px);
   overflow-y: auto;
 }
 
@@ -92,12 +92,15 @@
 
 .taskInfo h3 {
   margin: 0 0 12px 0;
-  font-size: 1.25rem;
+  font-size: 1.3rem;
   color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .taskDescription {
-  margin: 0;
+  margin: 0 0 12px 0;
   color: #666;
   font-size: 0.95rem;
   line-height: 1.5;
@@ -105,6 +108,27 @@
   background: #f8f9fa;
   border-radius: 6px;
   border-left: 4px solid #667eea;
+}
+
+.taskMeta {
+  display: flex;
+  gap: 15px;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.taskId {
+  background: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.taskCreator {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #e7f4ff;
+  color: #0056b3;
 }
 
 .errorMessage {
@@ -122,6 +146,22 @@
   padding: 40px 0;
   color: #6c757d;
   font-size: 1rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .assignToMeSection {
@@ -165,6 +205,50 @@
   cursor: not-allowed;
 }
 
+.alreadyAssigned {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 6px;
+  color: #155724;
+}
+
+.checkmark {
+  background: #28a745;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.unassignSelfButton {
+  margin-left: auto;
+  padding: 6px 12px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.unassignSelfButton:hover:not(:disabled) {
+  background: #c82333;
+}
+
+.unassignSelfButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .helperText {
   margin: 8px 0 0 0;
   color: #6c757d;
@@ -177,9 +261,16 @@
   margin-bottom: 24px;
 }
 
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .assignedSection h4,
 .availableSection h4 {
-  margin: 0 0 16px 0;
+  margin: 0;
   font-size: 1.1rem;
   color: #333;
   display: flex;
@@ -187,12 +278,25 @@
   gap: 8px;
 }
 
-.assignedSection h4::before {
-  content: '👥';
+.unassignAllButton {
+  padding: 6px 12px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.availableSection h4::before {
-  content: '👤';
+.unassignAllButton:hover:not(:disabled) {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+.unassignAllButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .emptyState {
@@ -208,6 +312,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 5px;
 }
 
 .userItem {
@@ -234,8 +341,8 @@
 }
 
 .userAvatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -243,7 +350,7 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .userDetails {
@@ -260,12 +367,16 @@
 
 .userRole {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 3px 10px;
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
   text-transform: uppercase;
+  max-width: 120px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .userActions {
@@ -283,6 +394,7 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .assignButton:hover:not(:disabled) {
@@ -296,14 +408,16 @@
 }
 
 .unassignButton {
-  padding: 8px 12px;
+  padding: 8px 16px;
   background: #dc3545;
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .unassignButton:hover:not(:disabled) {
@@ -387,6 +501,16 @@
     padding: 20px;
   }
   
+  .sectionHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .unassignAllButton {
+    align-self: flex-start;
+  }
+  
   .userItem {
     flex-direction: column;
     align-items: stretch;
@@ -405,4 +529,112 @@
   .statItem {
     align-items: flex-start;
   }
+}
+
+/* Стили для скроллбара */
+.usersList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.usersList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.usersList::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.usersList::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+
+
+/* Добавьте эти стили в существующий файл */
+
+.taskMeta {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.taskId {
+  background: #e9ecef;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.85rem;
+}
+
+.taskCreator {
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #e7f4ff;
+  color: #0056b3;
+  font-size: 0.85rem;
+}
+
+.subtasksOption {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkboxText {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.assignedStatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.assignedInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.assignedText {
+  font-weight: 500;
+  color: #155724;
+}
+
+.assignedId {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-family: monospace;
+}
+
+.taskMakerId {
+  font-size: 0.75rem;
+  color: #6c757d;
+  font-family: monospace;
+  background: #e9ecef;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 4px;
+  display: inline-block;
 }

@@ -77,6 +77,11 @@ const Project = () => {
     setSelectedTask(task);
     setIsAssignModalOpen(true);
   };
+  // Функция для обновления после назначения
+const handleAssignUpdate = (updatedTask) => {
+  // Перезагружаем задачи проекта
+  getProjectTasks();
+};
 
   const handleTaskStatusChange = (task) => {
     setSelectedTask(task);
