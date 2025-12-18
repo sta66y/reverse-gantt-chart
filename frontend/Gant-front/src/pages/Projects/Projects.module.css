@@ -1,27 +1,29 @@
 .projects {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-  padding-top: 80px; /* Для header */
+  padding: 40px 20px;
+  padding-top: 120px;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 15px;
 }
 
+/* Header с заголовком и действиями */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 3rem;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .title {
   color: white;
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 5vw, 2.8rem);
   font-weight: 600;
   margin: 0;
 }
@@ -30,6 +32,7 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .logout {
@@ -40,8 +43,10 @@
   border-radius: 25px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 500;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  white-space: nowrap;
 }
 
 .logout:hover {
@@ -49,23 +54,25 @@
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* Grid с карточками проектов */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  width: 100%; /* Явно указываем ширину */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
 }
 
+/* Статистика */
 .stats {
   display: flex;
   justify-content: center;
-  gap: 3rem;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.1);
+  gap: 2rem;
+  padding: 2.5rem;
+  background: rgba(255,  Zad, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-wrap: wrap;
 }
 
 .statItem {
@@ -73,6 +80,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  min-width: 100px;
 }
 
 .statNumber {
@@ -85,46 +93,79 @@
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   font-weight: 300;
+  text-align: center;
+}
+
+/* Общая ошибка */
+.errorMessage {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  margin: 1.5rem 0;
+  backdrop-filter: blur(10px);
 }
 
 /* Адаптивность */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
+  .projects {
+    padding-top: 90px;
+  }
+
   .header {
     flex-direction: column;
+    align-items: stretch;
     text-align: center;
   }
-  
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .stats {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
+
   .actions {
-    flex-direction: column;
+    justify-content: center;
     width: 100%;
   }
-  
+
   .logout {
     width: 100%;
+    max-width: 200px;
+  }
+
+  .stats {
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    gap: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .header {
+    margin-top: 50px;
   }
-  
-  .container {
-    padding: 0 10px;
+  .projects {
+    padding: 30px 15px;
+    padding-top: 80px;
+  }
+
+  .stats {
+    padding: 1.5rem;
+  }
+
+  .grid {
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 2rem;
   }
 }
-
 
 /* Модальное окно создания проекта */
 .modalOverlay {
@@ -310,32 +351,21 @@
   cursor: not-allowed;
 }
 
-.errorMessage {
-  background: rgba(255, 107, 107, 0.2);
-  border: 1px solid #ff6b6b;
-  color: #ff6b6b;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  backdrop-filter: blur(10px);
-}
-
 /* Адаптивность модального окна */
 @media (max-width: 768px) {
   .modal {
     padding: 1.5rem;
     margin: 1rem;
   }
-  
+
   .modalHeader h2 {
     font-size: 1.3rem;
   }
-  
+
   .modalFooter {
     flex-direction: column;
   }
-  
+
   .cancelButton,
   .createButton {
     width: 100%;
@@ -347,11 +377,11 @@
   .modal {
     padding: 1.2rem;
   }
-  
+
   .modalHeader h2 {
     font-size: 1.2rem;
   }
-  
+
   .formGroup input,
   .formGroup textarea {
     padding: 0.7rem 0.9rem;
