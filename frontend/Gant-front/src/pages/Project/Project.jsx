@@ -347,8 +347,12 @@ const Project = () => {
       id: task.id?.toString() || Date.now().toString(),
       title: task.title || "Без названия",
       description: task.description || "",
-      startDate: formatDateForUI(task.startData || task.startDate),
-      endDate: formatDateForUI(task.deadline),
+      // Сохраняем полные даты с временем для редактирования
+      startDate: task.startDate || task.startData || "",
+      endDate: task.deadline || "",
+      // Добавляем отдельные поля времени
+      startTime: extractTimeFromDate(task.startDate || task.startData),
+      endTime: extractTimeFromDate(task.deadline),
       status: task.taskStatus?.status || "Planned",
       reviewerStatus: task.reviewerTaskStatus?.status || "None",
       children: task.children ? transformApiTasksToUITasks(task.children) : [],
@@ -356,13 +360,30 @@ const Project = () => {
       creator: task.creator,
       comments: task.comments || [],
       taskMakers: task.taskMakers || [],
-      // Дополнительные данные
       taskStatus: task.taskStatus,
       reviewerTaskStatus: task.reviewerTaskStatus,
       projectId: task.projectId,
       createdDate: task.createdDate,
       pos: task.pos,
     }));
+  };
+
+  // Функция для извлечения времени из полной даты
+  const extractTimeFromDate = (dateString) => {
+    if (!dateString || typeof dateString !== "string") return "";
+
+    // Проверяем разные форматы
+    if (dateString.includes("T")) {
+      // Формат: "2024-12-18T14:30:00"
+      const timePart = dateString.split("T")[1];
+      return timePart.substring(0, 5); // HH:mm
+    } else if (dateString.includes(" ")) {
+      // Формат: "2024-12-18 14:30:00"
+      const timePart = dateString.split(" ")[1];
+      return timePart.substring(0, 5); // HH:mm
+    }
+
+    return "";
   };
 
   // Функция для форматирования дат
@@ -810,100 +831,79 @@ const Project = () => {
   };
 
   const handleSaveTask = async (taskData) => {
-    try {
-      if (taskData.id) {
-        // Обновление существующей задачи
-        const response = await fetch(
-          apiAddress + "projectComponent/action/update?projectId=" + projectId, // TODO: Проверить endpoint для обновления
-          {
-            method: "PATCH",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              componentId: parseInt(taskData.id),
-              title: taskData.title,
-              description: taskData.description,
-              startDate: taskData.startDate,
-              deadline: taskData.endDate,
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const updatedTask = await response.json();
-          // Обновляем локальное состояние
-          setTasks((prev) => updateTaskInTree(prev, taskData));
-
-          // TODO: Обновить инфо о проекте или задачи через API
-          // await getProjectTasks();
-        } else {
-          const errorData = await response.json();
-          showError({
-            message: errorData.message || "Ошибка обновления задачи",
-            code: response.status,
-          });
+  try {
+    if (taskData.id) {
+      // Обновление существующей задачи
+      const response = await fetch(
+        apiAddress + "projectComponent/action/update?projectId=" + projectId,
+        {
+          method: "PATCH",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            componentId: parseInt(taskData.id),
+            title: taskData.title,
+            description: taskData.description,
+            startDate: taskData.startDate,
+            deadlineDate: taskData.endDate,
+            startTime: taskData.startTime,
+            deadlineTime: taskData.endTime,
+          }),
         }
+      );
+
+      if (response.ok) {
+        // НЕ обновляем локально, а перезагружаем с сервера
+        await getProjectTasks(); // Это ключевое!
       } else {
-        // Создание новой задачи
-        const response = await fetch(
-          apiAddress + "projectComponent/action/create?projectId=" + projectId,
-          {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              title: taskData.title,
-              description: taskData.description,
-              startDate: taskData.startDate,
-              deadline: taskData.endDate,
-              parentId: taskData.parentId ? parseInt(taskData.parentId) : null,
-              // projectId добавляется в URL или body в зависимости от API
-            }),
-          }
-        );
-
-        if (response.ok) {
-          const createdTask = await response.json();
-
-          // Преобразуем ответ в формат для UI
-          const newTask = {
-            id: createdTask.id.toString(),
-            title: createdTask.title,
-            description: createdTask.description,
-            startDate: createdTask.startDate || createdTask.startData,
-            endDate: createdTask.deadline,
-            status: "Planned", // По умолчанию
-            reviewerStatus: "None", // По умолчанию
-            children: [],
-          };
-
-          // Добавляем в дерево
-          if (taskData.parentId) {
-            setTasks((prev) =>
-              addTaskToParent(prev, taskData.parentId, newTask)
-            );
-          } else {
-            setTasks((prev) => [...prev, newTask]);
-          }
-        } else {
-          const errorData = await response.json();
-          showError({
-            message: errorData.message || "Ошибка создания задачи",
-            code: response.status,
-          });
-        }
+        const errorData = await response.json();
+        showError({
+          message: errorData.message || "Ошибка обновления задачи",
+          code: response.status,
+        });
       }
-    } catch (err) {
-      showError({
-        message: "Ошибка соединения",
-        code: "NETWORK_ERROR",
-      });
-      console.error(err);
-    } finally {
-      setIsModalOpen(false);
-      setSelectedTask(null);
+    } else {
+      // Создание новой задачи
+      const response = await fetch(
+        apiAddress + "projectComponent/action/create?projectId=" + projectId,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: taskData.title,
+            description: taskData.description,
+            startDate: taskData.startDate,
+            deadlineDate: taskData.endDate,
+            deadlineTime: taskData.endTime,
+            startTime: taskData.startTime,
+            parentId: taskData.parentId ? parseInt(taskData.parentId) : null,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        // Перезагружаем задачи с сервера
+        await getProjectTasks(); // Это ключевое!
+      } else {
+        const errorData = await response.json();
+        showError({
+          message: errorData.message || "Ошибка создания задачи",
+          code: response.status,
+        });
+      }
     }
-  };
+  } catch (err) {
+    showError({
+      message: "Ошибка соединения",
+      code: "NETWORK_ERROR",
+    });
+    console.error(err);
+  } finally {
+    setIsModalOpen(false);
+    setSelectedTask(null);
+  }
+};
 
   const handleDeleteTask = async (taskId) => {
     const response = await fetch(
