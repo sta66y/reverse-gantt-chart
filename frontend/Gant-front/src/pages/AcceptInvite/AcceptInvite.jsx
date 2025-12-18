@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import styles from './AcceptInvite.module.css';
+import { useNotification } from "../../contexts/NotificationContext";
 
 function AcceptInvite() {
   const apiAddress = import.meta.env.VITE_API_ADDRESS;
@@ -11,6 +12,7 @@ function AcceptInvite() {
 
   const token = searchParams.get("token");
 
+  const { showError } = useNotification();
   useEffect(() => {
     checkToken();
   }, []);
@@ -38,7 +40,11 @@ function AcceptInvite() {
         }, 2000);
       } else {
         setStatus('error');
-        setMessage('Ошибка при принятии приглашения. Пожалуйста, попробуйте снова.');
+        showError({
+          message: "Ошибка при принятии приглашения.",
+          code: response.status
+        })
+        setMessage('Ошибка при принятии приглашения.');
       }
     } catch (error) {
       setStatus('error');

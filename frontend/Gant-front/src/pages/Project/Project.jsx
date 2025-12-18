@@ -63,6 +63,12 @@ const Project = () => {
 
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
 
+  // В состоянии компонента Project добавьте:
+  const [invites, setInvites] = useState([]);
+  const [invitesView, setInvitesView] = useState("pending"); // 'pending', 'all'
+  const [selectedInvite, setSelectedInvite] = useState(null);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
   // Тестовые данные пользователей проекта
   // setProjectUsers([
   //   { email: 'project.manager@company.com', role: 'Менеджер' },
@@ -79,10 +85,10 @@ const Project = () => {
     setIsAssignModalOpen(true);
   };
   // Функция для обновления после назначения
-const handleAssignUpdate = (updatedTask) => {
-  // Перезагружаем задачи проекта
-  getProjectTasks();
-};
+  const handleAssignUpdate = (updatedTask) => {
+    // Перезагружаем задачи проекта
+    getProjectTasks();
+  };
 
   const handleTaskStatusChange = (task) => {
     setSelectedTask(task);
@@ -104,6 +110,7 @@ const handleAssignUpdate = (updatedTask) => {
     getProjectInfo();
     getProjectUsers();
     getProjectTasks();
+    getProjectInvites();
     //setTasks(mockTasks);
   }, []);
 
@@ -149,6 +156,150 @@ const handleAssignUpdate = (updatedTask) => {
         code: response.status,
       });
     }
+  };
+
+  // Добавьте эту функцию после других get функций
+  const getProjectInvites = async () => {
+    try {
+      const response = await fetch(
+        apiAddress + "invite/action/all?projectId=" + projectId,
+        {
+          method: "GET",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Получены приглашения:", data);
+        setInvites(data);
+      } else {
+        console.log("Не удалось получить приглашения");
+      }
+    } catch (err) {
+      console.error("Ошибка загрузки приглашений:", err);
+    }
+  };
+  // Функция для повторной отправки приглашения
+  const handleResendInvite = async (email) => {
+    try {
+      const response = await fetch(
+        apiAddress +
+          "invite/action/resend?email=" +
+          email +
+          "&projectId=" +
+          projectId,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.ok) {
+        // Обновляем список приглашений
+        await getProjectInvites();
+      } else {
+        const errorData = await response.json();
+        showError({
+          message: errorData.message || "Ошибка повторной отправки",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      showError({
+        message: "Ошибка соединения",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    }
+  };
+
+  // Функция для изменения роли приглашения
+  const handleChangeInviteRole = async (email, newRole) => {
+    try {
+      const response = await fetch(apiAddress + "invite/action/changeRole", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,
+          projectId: parseInt(projectId),
+          role: newRole,
+        }),
+      });
+
+      if (response.ok) {
+        await getProjectInvites();
+      } else {
+        const errorData = await response.json();
+        showError({
+          message: errorData.message || "Ошибка изменения роли",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      showError({
+        message: "Ошибка соединения",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    }
+  };
+
+  // Функция для удаления приглашения
+  const handleDeleteInvite = async (email) => {
+    try {
+      const response = await fetch(
+        apiAddress +
+          "invite/action/delete?email=" +
+          email +
+          "&projectId=" +
+          projectId,
+        {
+          method: "DELETE",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.ok) {
+        await getProjectInvites();
+      } else {
+        const errorData = await response.json();
+        showError({
+          message: errorData.message || "Ошибка удаления приглашения",
+          code: response.status,
+        });
+      }
+    } catch (err) {
+      showError({
+        message: "Ошибка соединения",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    }
+  };
+
+  // Функция для преобразования статуса приглашения
+  const getInviteStatusString = (status) => {
+    const statusMap = {
+      SUBMITTED: "Отправлено",
+      REJECTED: "Отклонено",
+      EXPIRED: "Истекло",
+    };
+    return statusMap[status] || status;
+  };
+
+  // Функция для определения цвета статуса
+  const getInviteStatusColor = (status) => {
+    const colorMap = {
+      SUBMITTED: "#28a745", // Зеленый
+      REJECTED: "#dc3545", // Красный
+      EXPIRED: "#6c757d", // Серый
+    };
+    return colorMap[status] || "#6c757d";
   };
 
   // Добавьте эту функцию после других функций get:
@@ -305,7 +456,7 @@ const handleAssignUpdate = (updatedTask) => {
 
     try {
       const response = await fetch(
-        apiAddress + "invite/send" + "?projectId=" + projectId,
+        apiAddress + "invite/action/send" + "?projectId=" + projectId,
         {
           method: "POST",
           credentials: "include",
@@ -319,6 +470,7 @@ const handleAssignUpdate = (updatedTask) => {
       );
 
       if (response.ok) {
+        await getProjectInvites();
         // Обновляем список пользователей
         await getProjectUsers();
 
@@ -368,8 +520,8 @@ const handleAssignUpdate = (updatedTask) => {
           "membership/action/remove" +
           "?projectId=" +
           projectId +
-          "&email=" +
-          userToDelete.email,
+          "&projectUsername=" +
+          userToDelete.username,
         {
           method: "DELETE",
           credentials: "include",
@@ -423,8 +575,8 @@ const handleAssignUpdate = (updatedTask) => {
           "membership/action/updateAuthority" +
           "?projectId=" +
           projectId +
-          "&email=" +
-          userToEditRole.email +
+          "&projectUsername=" +
+          userToEditRole.username +
           "&role=" +
           getRequestRoleName(selectedRole),
         {
@@ -601,15 +753,18 @@ const handleAssignUpdate = (updatedTask) => {
     if (!commentText.trim()) return;
 
     try {
-      const response = await fetch(apiAddress + "comment/create?projectId=" + projectId, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          projectComponentId: parseInt(taskId),
-          comment: commentText,
-        }),
-      });
+      const response = await fetch(
+        apiAddress + "comment/create?projectId=" + projectId,
+        {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectComponentId: parseInt(taskId),
+            comment: commentText,
+          }),
+        }
+      );
 
       if (response.ok) {
         const newComment = await response.json();
@@ -862,8 +1017,26 @@ const handleAssignUpdate = (updatedTask) => {
   return (
     <div className={styles.project}>
       <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          {/* НОВАЯ кнопка выхода из проекта */}
+        <div className={styles.headerTop}>
+          <h1>{projectName || "Загрузка..."}</h1>
+          <div className={styles.headerTopRightSection}>
+            <button
+              className={styles.backButton}
+              onClick={handleBackToProjects}
+              title="Вернуться к проектам"
+            >
+              ← Назад к проектам
+            </button>
+            <button
+              className={styles.infoButton}
+              onClick={handleShowProjectInfo}
+              title="Информация о проекте"
+            >
+              ℹ️ О проекте
+            </button>
+          </div>
+        </div>
+        <div className={styles.headerMiddle}>
           <button
             className={styles.exitButton}
             onClick={handleDeleteProject}
@@ -878,25 +1051,8 @@ const handleAssignUpdate = (updatedTask) => {
           >
             Редактировать проект
           </button>
-
-          <button
-            className={styles.backButton}
-            onClick={handleBackToProjects}
-            title="Вернуться к проектам"
-          >
-            ← Назад к проектам
-          </button>
         </div>
-        <h1>{projectName || "Загрузка..."}</h1>
-        <div className={styles.headerRight}>
-          <button
-            className={styles.infoButton}
-            onClick={handleShowProjectInfo}
-            title="Информация о проекте"
-          >
-            ℹ️ О проекте
-          </button>
-
+        <div className={styles.headerBottom}>
           <div className={styles.controls}>
             <button
               className={styles.addButton}
@@ -922,6 +1078,12 @@ const handleAssignUpdate = (updatedTask) => {
                 onClick={() => setViewMode("users")}
               >
                 Участники
+              </button>
+              <button
+                className={viewMode === "invites" ? styles.active : ""}
+                onClick={() => setViewMode("invites")}
+              >
+                Приглашения
               </button>
             </div>
           </div>
@@ -958,6 +1120,164 @@ const handleAssignUpdate = (updatedTask) => {
             onReviewerStatusChange={handleReviewerStatusChange}
             onTaskAssign={handleTaskAssign}
           />
+        ) : viewMode === "invites" ? (
+          <div className={styles.invitesView}>
+            <div className={styles.invitesHeader}>
+              <div className={styles.invitesHeaderLeft}>
+                <h3>Приглашения в проект</h3>
+                <div className={styles.viewToggleInvites}>
+                  <button
+                    className={invitesView === "pending" ? styles.active : ""}
+                    onClick={() => setInvitesView("pending")}
+                  >
+                    Активные
+                  </button>
+                  <button
+                    className={invitesView === "all" ? styles.active : ""}
+                    onClick={() => setInvitesView("all")}
+                  >
+                    Все
+                  </button>
+                </div>
+              </div>
+              <div className={styles.statsSummary}>
+                <div className={styles.statItem}>
+                  <span className={styles.statNumber}>
+                    {
+                      invites.filter((i) => i.inviteStatus === "SUBMITTED")
+                        .length
+                    }
+                  </span>
+                  <span className={styles.statLabel}>Активных</span>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statNumber}>
+                    {invites.filter((i) => i.inviteStatus === "EXPIRED").length}
+                  </span>
+                  <span className={styles.statLabel}>Истекших</span>
+                </div>
+                <div className={styles.statItem}>
+                  <span className={styles.statNumber}>{invites.length}</span>
+                  <span className={styles.statLabel}>Всего</span>
+                </div>
+              </div>
+            </div>
+
+            {invites.length === 0 ? (
+              <div className={styles.noInvites}>
+                <p>Нет отправленных приглашений</p>
+                <button
+                  className={styles.addUserButton}
+                  onClick={handleAddUserClick}
+                >
+                  + Пригласить участника
+                </button>
+              </div>
+            ) : (
+              <div className={styles.invitesTable}>
+                <div className={styles.tableHeader}>
+                  <div className={styles.tableCell}>Email</div>
+                  <div className={styles.tableCell}>Роль</div>
+                  <div className={styles.tableCell}>Статус</div>
+                  <div className={styles.tableCell}>Отправитель</div>
+                  <div className={styles.tableCell}>Дата отправки</div>
+                  <div className={styles.tableCell}>Действия</div>
+                </div>
+                {invites
+                  .filter(
+                    (invite) =>
+                      invitesView === "all" ||
+                      invite.inviteStatus === "SUBMITTED"
+                  )
+                  .map((invite, index) => (
+                    <div
+                      key={`${invite.invitedPersonEmail}-${index}`}
+                      className={styles.tableRow}
+                    >
+                      <div className={styles.tableCell}>
+                        <span className={styles.inviteEmail}>
+                          {invite.invitedPersonEmail}
+                        </span>
+                      </div>
+                      <div className={styles.tableCell}>
+                        <span
+                          className={styles.inviteRole}
+                          style={{
+                            backgroundColor: getRoleColor(invite.userRole),
+                          }}
+                        >
+                          {getRoleString(invite.userRole)}
+                        </span>
+                      </div>
+                      <div className={styles.tableCell}>
+                        <span
+                          className={styles.inviteStatus}
+                          style={{
+                            backgroundColor: getInviteStatusColor(
+                              invite.inviteStatus
+                            ),
+                          }}
+                        >
+                          {getInviteStatusString(invite.inviteStatus)}
+                        </span>
+                      </div>
+                      <div className={styles.tableCell}>
+                        <span className={styles.inviterEmail}>
+                          {invite.inviter || "Система"}
+                        </span>
+                      </div>
+                      <div className={styles.tableCell}>
+                        <span className={styles.inviteDate}>
+                          {formatDate(invite.inviteDate) || "Неизвестно"}
+                        </span>
+                      </div>
+                      <div className={styles.tableCell}>
+                        <div className={styles.inviteActions}>
+                          {invite.inviteStatus === "SUBMITTED" && (
+                            <>
+                              <button
+                                className={styles.resendButton}
+                                onClick={() =>
+                                  handleResendInvite(invite.invitedPersonEmail)
+                                }
+                                title="Отправить повторно"
+                              >
+                                Повторить
+                              </button>
+                              <button
+                                className={styles.editRoleButton}
+                                onClick={() => {
+                                  setSelectedInvite(invite);
+                                  setIsInviteModalOpen(true);
+                                }}
+                                title="Изменить роль"
+                              >
+                                Изменить роль
+                              </button>
+                            </>
+                          )}
+                          <button
+                            className={styles.deleteButton}
+                            onClick={() => {
+                              if (
+                                window.confirm(
+                                  `Удалить приглашение для ${invite.invitedPersonEmail}?`
+                                )
+                              ) {
+                                handleDeleteInvite(invite.invitedPersonEmail);
+                              }
+                            }}
+                            title="Удалить приглашение"
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
         ) : (
           <div className={styles.usersView}>
             <div className={styles.statsSection}>
@@ -987,7 +1307,7 @@ const handleAssignUpdate = (updatedTask) => {
                   className={styles.addUserButton}
                   onClick={handleAddUserClick}
                 >
-                  + Добавить участника
+                  + Пригласить участника
                 </button>
               </div>
               <div className={styles.usersTable}>
@@ -1043,6 +1363,104 @@ const handleAssignUpdate = (updatedTask) => {
           </div>
         )}
       </main>
+      {isInviteModalOpen && selectedInvite && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setIsInviteModalOpen(false)}
+        >
+          <div
+            className={styles.editRoleModal}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2>Изменение роли приглашения</h2>
+              <button
+                className={styles.closeButton}
+                onClick={() => setIsInviteModalOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <p>
+                Изменить роль для приглашения:{" "}
+                <strong>{selectedInvite.invitedPersonEmail}</strong>
+              </p>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="newInviteRole">Новая роль</label>
+                <select
+                  id="newInviteRole"
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className={styles.roleSelect}
+                >
+                  <option value="ROLE_PLANNER">Планнер</option>
+                  <option value="ROLE_REVIEWER">Ревьюер</option>
+                  <option value="ROLE_STUDENT">Студент</option>
+                  <option value="ROLE_VIEWER">Гость</option>
+                </select>
+              </div>
+
+              <div className={styles.currentInfo}>
+                <div className={styles.infoRow}>
+                  <span>Текущая роль:</span>
+                  <span
+                    className={styles.currentRole}
+                    style={{
+                      backgroundColor: getRoleColor(selectedInvite.userRole),
+                    }}
+                  >
+                    {getRoleString(selectedInvite.userRole)}
+                  </span>
+                </div>
+                <div className={styles.infoRow}>
+                  <span>Статус:</span>
+                  <span
+                    className={styles.currentStatus}
+                    style={{
+                      backgroundColor: getInviteStatusColor(
+                        selectedInvite.inviteStatus
+                      ),
+                    }}
+                  >
+                    {getInviteStatusString(selectedInvite.inviteStatus)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setIsInviteModalOpen(false)}
+              >
+                Отмена
+              </button>
+              <button
+                className={styles.saveButton}
+                onClick={() => {
+                  if (selectedRole) {
+                    handleChangeInviteRole(
+                      selectedInvite.invitedPersonEmail,
+                      selectedRole
+                    );
+                    setIsInviteModalOpen(false);
+                    setSelectedInvite(null);
+                    setSelectedRole("");
+                  }
+                }}
+                disabled={
+                  !selectedRole || selectedRole === selectedInvite.userRole
+                }
+              >
+                Сохранить изменения
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Модальное окно комментариев */}
       {isCommentsModalOpen && taskForComments && (
         <CommentsModal
@@ -1423,7 +1841,7 @@ const handleAssignUpdate = (updatedTask) => {
             <div className={styles.modalBody}>
               <p>
                 Изменить роль для пользователя:{" "}
-                <strong>{userToEditRole.email}</strong>
+                <strong>{userToEditRole.username}</strong>
               </p>
 
               <div className={styles.formGroup}>

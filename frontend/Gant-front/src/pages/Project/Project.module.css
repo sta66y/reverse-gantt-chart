@@ -11,9 +11,6 @@
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   margin-bottom: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 
 .header h1 {
@@ -246,18 +243,28 @@
     padding: 8px 12px;
   }
 }
-
-/* Добавляем в конец существующего файла */
-
 /* Стили для кнопок в заголовке */
-.headerLeft {
+.headerTop {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 15px;
 }
 
-.headerRight {
+.headerTopRightSection {
+  width: 10wh;
   display: flex;
+  gap: 15px
+}
+.headerMiddle {
+  justify-content: end;
+  display: flex;
+  gap: 15px
+}
+
+.headerBottom {
+  display: flex;
+  justify-content: center;
   align-items: center;
   gap: 15px;
 }
@@ -916,5 +923,321 @@ select.inputError:focus {
   .saveButton,
   .deleteConfirmButton {
     width: 100%;
+  }
+}
+
+/* Стили для вкладки приглашений */
+.invitesView {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.invitesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.invitesHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.invitesHeaderLeft h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.viewToggleInvites {
+  display: flex;
+  background: #e9ecef;
+  border-radius: 5px;
+  padding: 2px;
+}
+
+.viewToggleInvites button {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.3s;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.viewToggleInvites button.active {
+  background: white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-weight: 500;
+}
+
+.statsSummary {
+  display: flex;
+  gap: 15px;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  min-width: 80px;
+}
+
+.statNumber {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.statLabel {
+  font-size: 11px;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.noInvites {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+.noInvites p {
+  margin-bottom: 20px;
+}
+
+.invitesTable {
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.tableHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  background: #f8f9fa;
+  padding: 12px 16px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  transition: background 0.3s ease;
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableRow:hover {
+  background: #f8f9fa;
+}
+
+.inviteEmail {
+  font-weight: 500;
+  color: #333;
+}
+
+.inviterEmail {
+  color: #495057;
+  font-size: 13px;
+}
+
+.inviteDate {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+.inviteRole {
+  color: white;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  min-width: 70px;
+}
+
+.inviteStatus {
+  color: white;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;
+}
+
+.inviteActions {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.resendButton {
+  padding: 5px 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  white-space: nowrap;
+}
+
+.resendButton:hover {
+  background: #0056b3;
+}
+
+.editRoleButton {
+  padding: 5px 10px;
+  background: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  white-space: nowrap;
+}
+
+.editRoleButton:hover {
+  background: #138496;
+}
+
+.deleteButton {
+  padding: 5px 10px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  white-space: nowrap;
+}
+
+.deleteButton:hover {
+  background: #c82333;
+}
+
+.currentInfo {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.currentInfo .infoRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.currentInfo .infoRow:last-child {
+  margin-bottom: 0;
+}
+
+.currentInfo .infoRow span:first-child {
+  font-weight: 500;
+  color: #333;
+  min-width: 80px;
+}
+
+.currentStatus {
+  color: white;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+/* Адаптивность */
+@media (max-width: 1024px) {
+  .tableHeader,
+  .tableRow {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .invitesHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .invitesHeaderLeft {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .statsSummary {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .tableHeader,
+  .tableRow {
+    min-width: 800px;
+  }
+  
+  .invitesTable {
+    overflow-x: auto;
+  }
+  
+  .inviteActions {
+    flex-direction: column;
+  }
+  
+  .resendButton,
+  .editRoleButton,
+  .deleteButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .viewToggleInvites {
+    flex-wrap: wrap;
+  }
+  
+  .viewToggleInvites button {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  
+  .statItem {
+    min-width: 60px;
+    padding: 6px 8px;
+  }
+  
+  .statNumber {
+    font-size: 16px;
+  }
+  
+  .statLabel {
+    font-size: 10px;
   }
 }
