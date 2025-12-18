@@ -7,200 +7,160 @@ import Header from '../../components/ui/Header/Header';
 import { useNotification } from '../../contexts/NotificationContext';
 
 const Auth = () => {
-
-  const apiAddress = import.meta.env.VITE_API_ADDRESS
-  // Состояние для переключения между входом и регистрацией
+  const apiAddress = import.meta.env.VITE_API_ADDRESS;
   const [isLogin, setIsLogin] = useState(true);
-  
-  // Состояние для данных формы
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: ''
   });
-  
-  // Состояние для ошибок валидации
+
   const [errors, setErrors] = useState({});
-  
-  // Состояние для загрузки (показываем спиннер)
   const [loading, setLoading] = useState(false);
-  
-  // Состояние для ошибок от API
   const [apiError, setApiError] = useState('');
 
   const { showError } = useNotification();
-  
   const navigate = useNavigate();
 
-  // Функция валидации формы
   const validateForm = () => {
-    const newErrors = {};
-    
-    if (!formData.username) {
-      newErrors.username = 'Email обязателен';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.username = 'Некорректный формат email';
+  const newErrors = {};
+
+  if (isLogin) {
+    // При входе — только проверяем, что поле не пустое
+    if (!formData.email.trim()) {
+      newErrors.email = 'Введите email или username';
     }
-    
-    // Валидация email
-    if (!formData.email) {
+    // ← Больше никакой валидации! Можно ввести username без @
+  } else {
+    // При регистрации — полная проверка email
+    if (!formData.email.trim()) {
       newErrors.email = 'Email обязателен';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Некорректный формат email';
     }
-    
-    // Валидация пароля
-    if (!formData.password) {
-      newErrors.password = 'Пароль обязателен';
-    } else if (!isLogin && formData.password.length < 6) {
-      newErrors.password = 'Пароль должен быть не менее 6 символов';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
-  // Обработчик отправки формы
+    // Username только при регистрации
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username обязателен';
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'Username должен быть не менее 3 символов';
+    }
+  }
+
+  // Пароль
+  if (!formData.password) {
+    newErrors.password = 'Пароль обязателен';
+  } else if (!isLogin && formData.password.length < 6) {
+    newErrors.password = 'Пароль должен быть не менее 6 символов';
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Валидируем форму перед отправкой
-    if (!validateForm()) return;
-    
-    // Начинаем загрузку
-    setLoading(true);
-    setApiError('');
-    
-    try {
-      // TODO: Заменить на реальный вызов API
-      console.log('Отправляем данные:', formData);
-      
-      // Имитация запроса к API (задержка 1 секунда)
-      // await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Имитация ответа от сервера
-      // В реальном приложении здесь будет:
+  e.preventDefault();
+  if (!validateForm()) return;
 
-      // if(!isLogin) {
-      //   const response = await fetch(apiAddress + 'auth/register', {
-      //     method: 'POST',
-      //     credentials: 'include',  // ← ВАЖНО!
-      //     headers: { 'Content-Type': 'application/json' },
-      //     body: JSON.stringify(formData)
-      //   });
-      //   if(!response.ok) throw new Error("Ошибка на стороне регистрации: " + response.message)
-      // }
+  setLoading(true);
+  setApiError('');
 
-      const response = await fetch(apiAddress + 'auth/' + (isLogin ? 'login' : 'register'), {
-        method: 'POST',
-        credentials: 'include',  // ← ВАЖНО!
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      
-      console.log(response)
-      
-      if (response.ok) {
-        const data = await response.json();
-        console.log(data)
+  try {
+    const payload = {
+      username: isLogin ? formData.email : formData.username,
+      password: formData.password,
+    };
 
-        // Переходим на страницу проектов
-        if(isLogin) navigate('/projects');
-        else window.location.reload()
-      }
-      else  {
-        // Имитация ошибки от сервера
-        throw new Error('Неверный email или пароль, либо пользователь уже существует');
-      }
-      
-    } catch (error) {
-      // Обрабатываем ошибки
-      setApiError(error.message || 'Произошла ошибка при авторизации');
-
-      showError({
-        message: error.message,
-        code: "unknown"
-      })
-    } finally {
-      // Завершаем загрузку в любом случае
-      setLoading(false);
+    if (!isLogin) {
+      payload.email = formData.email;
     }
-  };
 
-  // Обработчик изменения полей формы
+    const response = await fetch(
+      apiAddress + 'auth/' + (isLogin ? 'login' : 'register'),
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Успешно:', data);
+
+      if (isLogin) {
+        navigate('/projects');
+      } else {
+        setIsLogin(true);
+        setFormData({ username: '', email: '', password: '' });
+      }
+    } else {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || 'Ошибка авторизации');
+    }
+  } catch (error) {
+    const msg = error.message || 'Произошла ошибка при авторизации';
+    setApiError(msg);
+    showError({ message: msg, code: 'auth_error' });
+  } finally {
+    setLoading(false);
+  }
+};
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Обновляем данные формы
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-    
-    // Очищаем ошибку для этого поля, если пользователь начал вводить
+    setFormData(prev => ({ ...prev, [name]: value }));
+
     if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: ''
-      });
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
-    
-    // Также очищаем общую ошибку API
-    if (apiError) {
-      setApiError('');
-    }
+    if (apiError) setApiError('');
   };
 
-  // Обработчик переключения между входом и регистрацией
   const handleToggleMode = () => {
-    setIsLogin(!isLogin);
-    // Очищаем все ошибки при переключении
-    setErrors({});
-    setApiError('');
-    // Можно также очистить форму, но это на твое усмотрение:
-    // setFormData({ email: '', password: '' });
-  };
-
+  setIsLogin(!isLogin);
+  setErrors({});
+  setApiError('');
+  setFormData({ username: '', email: '', password: '' }); // ← Полная очистка
+};
   return (
     <div className={styles.auth}>
       <Header />
-      
       <div className={styles['auth-content']}>
         <h2>{isLogin ? 'Вход в систему' : 'Создать аккаунт'}</h2>
-        
+
         <form onSubmit={handleSubmit} className={styles.form}>
-          {/* Поле UserName */}
+          {!isLogin && (
+            <div className={styles.inputGroup}>
+              <input
+                type="text"
+                name="username"
+                placeholder="Придумайте username"
+                value={formData.username}
+                onChange={handleChange}
+                className={errors.username ? styles.error : ''}
+                disabled={loading}
+              />
+              {errors.username && <span className={styles.errorText}>{errors.username}</span>}
+            </div>
+          )}
+
+          {/* Email */}
           <div className={styles.inputGroup}>
             <input
-              type="username"
-              name="username"
-              placeholder="Введите ваш username"
-              value={formData.username}
-              onChange={handleChange}
-              className={errors.username ? styles.error : ''}
-              disabled={loading}
-            />
-            {errors.username && (
-              <span className={styles.errorText}>{errors.username}</span>
-            )}
-          </div>
-          {/* Поле Email */}
-          <div className={styles.inputGroup}>
-            <input
-              type="email"
+              type={isLogin ? "text" : "email"}  // ← Вход: text, Регистрация: email
               name="email"
-              placeholder="Введите ваш email"
+              placeholder={isLogin ? "Email или username" : "Введите ваш email"}  // ← Подсказка пользователю
               value={formData.email}
               onChange={handleChange}
               className={errors.email ? styles.error : ''}
               disabled={loading}
             />
-            {errors.email && (
-              <span className={styles.errorText}>{errors.email}</span>
-            )}
+            {errors.email && <span className={styles.errorText}>{errors.email}</span>}
           </div>
-          
-          {/* Поле Пароль */}
+
+          {/* Пароль */}
           <div className={styles.inputGroup}>
             <input
               type="password"
@@ -211,35 +171,25 @@ const Auth = () => {
               className={errors.password ? styles.error : ''}
               disabled={loading}
             />
-            {errors.password && (
-              <span className={styles.errorText}>{errors.password}</span>
-            )}
+            {errors.password && <span className={styles.errorText}>{errors.password}</span>}
           </div>
-          
+
           {/* Кнопка отправки */}
-          <Button 
-            variant='start' 
+          <Button
+            variant='start'
             type="submit"
             disabled={loading}
             className={styles.submitButton}
           >
             {loading ? 'Загрузка...' : (isLogin ? 'Войти' : 'Зарегистрироваться')}
           </Button>
-          
-          {/* Ошибка от API */}
-          {apiError && (
-            <div className={styles.apiError}>
-              {apiError}
-            </div>
-          )}
+
+          {/* API ошибка */}
+          {apiError && <div className={styles.apiError}>{apiError}</div>}
         </form>
-        
-        {/* Кнопка переключения режима */}
-        <Button 
-          onClick={handleToggleMode}
-          variant='toggle'
-          disabled={loading}
-        >
+
+        {/* Переключение режима */}
+        <Button onClick={handleToggleMode} variant='toggle' disabled={loading}>
           {isLogin ? 'Нет аккаунта? Зарегистрироваться' : 'Уже есть аккаунт? Войти'}
         </Button>
       </div>

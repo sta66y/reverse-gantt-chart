@@ -1,11 +1,13 @@
+body {
+  font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+}
+
 .title {
   font-weight: 400;
 }
 .main {
   display: flex;
   justify-content: center;
-}
-.welcome {
 }
 
 /* Welcome.css */

@@ -1,27 +1,29 @@
 .projects {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-  padding-top: 80px; /* Для header */
+  padding: 40px 20px;
+  padding-top: 120px;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 15px;
 }
 
+/* Header с заголовком и действиями */
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 3rem;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .title {
   color: white;
-  font-size: 2.5rem;
+  font-size: clamp(2rem, 5vw, 2.8rem);
   font-weight: 600;
   margin: 0;
 }
@@ -30,6 +32,7 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .logout {
@@ -40,8 +43,10 @@
   border-radius: 25px;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 500;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  white-space: nowrap;
 }
 
 .logout:hover {
@@ -49,23 +54,25 @@
   border-color: rgba(255, 255, 255, 0.5);
 }
 
+/* Grid с карточками проектов */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-  width: 100%; /* Явно указываем ширину */
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
 }
 
+/* Статистика */
 .stats {
   display: flex;
   justify-content: center;
-  gap: 3rem;
-  padding: 2rem;
-  background: rgba(255, 255, 255, 0.1);
+  gap: 2rem;
+  padding: 2.5rem;
+  background: rgba(255,  Zad, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-wrap: wrap;
 }
 
 .statItem {
@@ -73,6 +80,7 @@
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  min-width: 100px;
 }
 
 .statNumber {
@@ -85,46 +93,79 @@
   color: rgba(255, 255, 255, 0.8);
   font-size: 0.9rem;
   font-weight: 300;
+  text-align: center;
+}
+
+/* Общая ошибка */
+.errorMessage {
+  background: rgba(255, 107, 107, 0.2);
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  margin: 1.5rem 0;
+  backdrop-filter: blur(10px);
 }
 
 /* Адаптивность */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
+  .projects {
+    padding-top: 90px;
+  }
+
   .header {
     flex-direction: column;
+    align-items: stretch;
     text-align: center;
   }
-  
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  
-  .stats {
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
+
   .actions {
-    flex-direction: column;
+    justify-content: center;
     width: 100%;
   }
-  
+
   .logout {
     width: 100%;
+    max-width: 200px;
+  }
+
+  .stats {
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    gap: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+  .header {
+    margin-top: 50px;
   }
-  
-  .container {
-    padding: 0 10px;
+  .projects {
+    padding: 30px 15px;
+    padding-top: 80px;
+  }
+
+  .stats {
+    padding: 1.5rem;
+  }
+
+  .grid {
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 2rem;
   }
 }
-
 
 /* Модальное окно создания проекта */
 .modalOverlay {
@@ -139,6 +180,7 @@
   justify-content: center;
   z-index: 1000;
   backdrop-filter: blur(5px);
+  animation: fadeIn 0.3s ease-out;
 }
 
 .modal {
@@ -151,6 +193,23 @@
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .modalHeader {
@@ -165,7 +224,7 @@
 .modalHeader h2 {
   color: white;
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 600;
 }
 
@@ -173,19 +232,20 @@
   background: transparent;
   border: none;
   color: white;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   cursor: pointer;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .closeButton:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.1);
 }
 
 .modalBody {
@@ -193,14 +253,15 @@
 }
 
 .apiError {
-  background: rgba(255, 107, 107, 0.2);
+  background: rgba(255, 107, 107, 0.25);
   border: 1px solid #ff6b6b;
   color: #ff6b6b;
-  padding: 0.8rem;
-  border-radius: 8px;
-  margin-bottom: 1rem;
+  padding: 0.9rem;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  backdrop-filter: blur(10px);
 }
 
 .formGroup {
@@ -209,37 +270,38 @@
 
 .formGroup label {
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
   color: white;
   font-weight: 500;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
 }
 
 .formGroup input,
 .formGroup textarea {
   width: 100%;
-  padding: 0.8rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
+  border-radius: 12px;
   color: white;
   font-size: 1rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  box-sizing: border-box;
 }
 
 .formGroup textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 100px;
   font-family: inherit;
 }
 
 .formGroup input:focus,
 .formGroup textarea:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
 }
 
 .formGroup input::placeholder,
@@ -249,14 +311,15 @@
 
 .inputError {
   border-color: #ff6b6b !important;
-  background: rgba(255, 107, 107, 0.1) !important;
+  background: rgba(255, 107, 107, 0.15) !important;
 }
 
 .errorText {
   color: #ff6b6b;
-  font-size: 0.8rem;
-  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
   display: block;
+  font-weight: 500;
 }
 
 .modalFooter {
@@ -268,92 +331,83 @@
 }
 
 .cancelButton {
-  padding: 0.8rem 1.5rem;
+  padding: 0.9rem 1.6rem;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   color: white;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
   transition: all 0.3s ease;
-  min-width: 100px;
+  min-width: 110px;
 }
 
-.cancelButton:hover {
+.cancelButton:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.6);
 }
 
 .createButton {
-  padding: 0.8rem 1.5rem;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.9rem 1.6rem;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   color: white;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  min-width: 140px;
+  min-width: 150px;
   backdrop-filter: blur(10px);
 }
 
 .createButton:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 .createButton:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
-}
-
-.errorMessage {
-  background: rgba(255, 107, 107, 0.2);
-  border: 1px solid #ff6b6b;
-  color: #ff6b6b;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  backdrop-filter: blur(10px);
+  transform: none;
 }
 
 /* Адаптивность модального окна */
 @media (max-width: 768px) {
   .modal {
-    padding: 1.5rem;
+    padding: 1.8rem;
     margin: 1rem;
   }
-  
+
   .modalHeader h2 {
-    font-size: 1.3rem;
+    font-size: 1.4rem;
   }
-  
+
   .modalFooter {
     flex-direction: column;
   }
-  
+
   .cancelButton,
   .createButton {
     width: 100%;
-    min-width: auto;
   }
 }
 
 @media (max-width: 480px) {
   .modal {
-    padding: 1.2rem;
+    padding: 1.5rem;
   }
-  
+
   .modalHeader h2 {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
-  
+
   .formGroup input,
   .formGroup textarea {
-    padding: 0.7rem 0.9rem;
+    padding: 0.8rem;
+    font-size: 0.95rem;
   }
 }
