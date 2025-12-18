@@ -42,7 +42,7 @@ const Project = () => {
   const [editErrors, setEditErrors] = useState({});
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
 
-  const { showError } = useNotification();
+  const { showError, showSuccess } = useNotification();
 
   // Добавьте в состояние:
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
@@ -200,6 +200,7 @@ const Project = () => {
       if (response.ok) {
         // Обновляем список приглашений
         await getProjectInvites();
+        showSuccess("Приглашение было переотправлено!");
       } else {
         const errorData = await response.json();
         showError({
@@ -219,13 +220,12 @@ const Project = () => {
   // Функция для изменения роли приглашения
   const handleChangeInviteRole = async (email, newRole) => {
     try {
-      const response = await fetch(apiAddress + "invite/action/changeRole", {
+      const response = await fetch(apiAddress + "invite/action/changeRole?projectId=" + projectId, {
         method: "PATCH",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: email,
-          projectId: parseInt(projectId),
           role: newRole,
         }),
       });
@@ -365,6 +365,7 @@ const Project = () => {
       projectId: task.projectId,
       createdDate: task.createdDate,
       pos: task.pos,
+      globalTaskStatus: task.globalTaskStatus
     }));
   };
 
@@ -450,10 +451,6 @@ const Project = () => {
   // Валидация формы добавления пользователя
   const validateAddUserForm = () => {
     const errors = {};
-
-    if (!newUserData.username) {
-      errors.username = "Username обязателен";
-    }
 
     if (!newUserData.email.trim()) {
       errors.email = "Email обязателен";
@@ -831,79 +828,79 @@ const Project = () => {
   };
 
   const handleSaveTask = async (taskData) => {
-  try {
-    if (taskData.id) {
-      // Обновление существующей задачи
-      const response = await fetch(
-        apiAddress + "projectComponent/action/update?projectId=" + projectId,
-        {
-          method: "PATCH",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            componentId: parseInt(taskData.id),
-            title: taskData.title,
-            description: taskData.description,
-            startDate: taskData.startDate,
-            deadlineDate: taskData.endDate,
-            startTime: taskData.startTime,
-            deadlineTime: taskData.endTime,
-          }),
-        }
-      );
+    try {
+      if (taskData.id) {
+        // Обновление существующей задачи
+        const response = await fetch(
+          apiAddress + "projectComponent/action/update?projectId=" + projectId,
+          {
+            method: "PATCH",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              componentId: parseInt(taskData.id),
+              title: taskData.title,
+              description: taskData.description,
+              startDate: taskData.startDate,
+              deadlineDate: taskData.endDate,
+              startTime: taskData.startTime,
+              deadlineTime: taskData.endTime,
+            }),
+          }
+        );
 
-      if (response.ok) {
-        // НЕ обновляем локально, а перезагружаем с сервера
-        await getProjectTasks(); // Это ключевое!
-      } else {
-        const errorData = await response.json();
-        showError({
-          message: errorData.message || "Ошибка обновления задачи",
-          code: response.status,
-        });
-      }
-    } else {
-      // Создание новой задачи
-      const response = await fetch(
-        apiAddress + "projectComponent/action/create?projectId=" + projectId,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: taskData.title,
-            description: taskData.description,
-            startDate: taskData.startDate,
-            deadlineDate: taskData.endDate,
-            deadlineTime: taskData.endTime,
-            startTime: taskData.startTime,
-            parentId: taskData.parentId ? parseInt(taskData.parentId) : null,
-          }),
+        if (response.ok) {
+          // НЕ обновляем локально, а перезагружаем с сервера
+          await getProjectTasks(); // Это ключевое!
+        } else {
+          const errorData = await response.json();
+          showError({
+            message: errorData.message || "Ошибка обновления задачи",
+            code: response.status,
+          });
         }
-      );
-
-      if (response.ok) {
-        // Перезагружаем задачи с сервера
-        await getProjectTasks(); // Это ключевое!
       } else {
-        const errorData = await response.json();
-        showError({
-          message: errorData.message || "Ошибка создания задачи",
-          code: response.status,
-        });
+        // Создание новой задачи
+        const response = await fetch(
+          apiAddress + "projectComponent/action/create?projectId=" + projectId,
+          {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              title: taskData.title,
+              description: taskData.description,
+              startDate: taskData.startDate,
+              deadlineDate: taskData.endDate,
+              deadlineTime: taskData.endTime,
+              startTime: taskData.startTime,
+              parentId: taskData.parentId ? parseInt(taskData.parentId) : null,
+            }),
+          }
+        );
+
+        if (response.ok) {
+          // Перезагружаем задачи с сервера
+          await getProjectTasks(); // Это ключевое!
+        } else {
+          const errorData = await response.json();
+          showError({
+            message: errorData.message || "Ошибка создания задачи",
+            code: response.status,
+          });
+        }
       }
+    } catch (err) {
+      showError({
+        message: "Ошибка соединения",
+        code: "NETWORK_ERROR",
+      });
+      console.error(err);
+    } finally {
+      setIsModalOpen(false);
+      setSelectedTask(null);
     }
-  } catch (err) {
-    showError({
-      message: "Ошибка соединения",
-      code: "NETWORK_ERROR",
-    });
-    console.error(err);
-  } finally {
-    setIsModalOpen(false);
-    setSelectedTask(null);
-  }
-};
+  };
 
   const handleDeleteTask = async (taskId) => {
     const response = await fetch(
@@ -1676,7 +1673,7 @@ const Project = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className={styles.modalHeader}>
-              <h2>Добавить участника</h2>
+              <h2>Пригласить участника</h2>
               <button
                 className={styles.closeButton}
                 onClick={() => setIsAddUserModalOpen(false)}
@@ -1690,25 +1687,6 @@ const Project = () => {
               {addUserErrors.api && (
                 <div className={styles.apiError}>{addUserErrors.api}</div>
               )}
-
-              <div className={styles.formGroup}>
-                <label htmlFor="username">Username участника *</label>
-                <input
-                  type="username"
-                  id="username"
-                  name="username"
-                  value={newUserData.username}
-                  onChange={handleNewUserInputChange}
-                  placeholder="username"
-                  className={addUserErrors.username ? styles.inputError : ""}
-                  disabled={isAddingUser}
-                />
-                {addUserErrors.username && (
-                  <span className={styles.errorText}>
-                    {addUserErrors.username}
-                  </span>
-                )}
-              </div>
 
               <div className={styles.formGroup}>
                 <label htmlFor="userEmail">Email участника *</label>
