@@ -14,6 +14,7 @@ const Auth = () => {
   
   // Состояние для данных формы
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     password: ''
   });
@@ -34,6 +35,12 @@ const Auth = () => {
   // Функция валидации формы
   const validateForm = () => {
     const newErrors = {};
+    
+    if (!formData.username) {
+      newErrors.username = 'Email обязателен';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.username = 'Некорректный формат email';
+    }
     
     // Валидация email
     if (!formData.email) {
@@ -162,6 +169,21 @@ const Auth = () => {
         <h2>{isLogin ? 'Вход в систему' : 'Создать аккаунт'}</h2>
         
         <form onSubmit={handleSubmit} className={styles.form}>
+          {/* Поле UserName */}
+          <div className={styles.inputGroup}>
+            <input
+              type="username"
+              name="username"
+              placeholder="Введите ваш username"
+              value={formData.username}
+              onChange={handleChange}
+              className={errors.username ? styles.error : ''}
+              disabled={loading}
+            />
+            {errors.username && (
+              <span className={styles.errorText}>{errors.username}</span>
+            )}
+          </div>
           {/* Поле Email */}
           <div className={styles.inputGroup}>
             <input

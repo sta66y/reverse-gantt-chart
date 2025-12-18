@@ -47,6 +47,7 @@ const Project = () => {
   // Добавьте в состояние:
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [newUserData, setNewUserData] = useState({
+    username: "",
     email: "",
     userRole: "ROLE_STUDENT",
   });
@@ -245,6 +246,7 @@ const handleAssignUpdate = (updatedTask) => {
       const data = await response.json();
       const result = data.map((item) => {
         return {
+          username: item.username,
           email: item.email,
           role: item.userRole,
         };
@@ -265,6 +267,7 @@ const handleAssignUpdate = (updatedTask) => {
 
   const handleAddUserClick = () => {
     setNewUserData({
+      username: "",
       email: "",
       userRole: "ROLE_STUDENT",
     });
@@ -275,6 +278,10 @@ const handleAssignUpdate = (updatedTask) => {
   // Валидация формы добавления пользователя
   const validateAddUserForm = () => {
     const errors = {};
+
+    if (!newUserData.username) {
+      errors.username = "Username обязателен";
+    }
 
     if (!newUserData.email.trim()) {
       errors.email = "Email обязателен";
@@ -298,14 +305,15 @@ const handleAssignUpdate = (updatedTask) => {
 
     try {
       const response = await fetch(
-        apiAddress + "membership/action/add" + "?projectId=" + projectId,
+        apiAddress + "invite/send" + "?projectId=" + projectId,
         {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: newUserData.email,
-            userRole: newUserData.userRole,
+            projectId: projectId,
+            role: newUserData.userRole,
           }),
         }
       );
@@ -320,6 +328,7 @@ const handleAssignUpdate = (updatedTask) => {
 
         // Очищаем форму
         setNewUserData({
+          username: "",
           email: "",
           userRole: "ROLE_STUDENT",
         });
@@ -983,6 +992,7 @@ const handleAssignUpdate = (updatedTask) => {
               </div>
               <div className={styles.usersTable}>
                 <div className={styles.tableHeader}>
+                  <div className={styles.tableCell}>Username</div>
                   <div className={styles.tableCell}>Email</div>
                   <div className={styles.tableCell}>Роль</div>
                   <div className={styles.tableCell}>Действия</div>
@@ -992,6 +1002,9 @@ const handleAssignUpdate = (updatedTask) => {
                     key={`${user.email}-${index}`}
                     className={styles.tableRow}
                   >
+                    <div className={styles.tableCell}>
+                      <span className={styles.userEmail}>{user.username}</span>
+                    </div>
                     <div className={styles.tableCell}>
                       <span className={styles.userEmail}>{user.email}</span>
                     </div>
@@ -1259,6 +1272,25 @@ const handleAssignUpdate = (updatedTask) => {
               {addUserErrors.api && (
                 <div className={styles.apiError}>{addUserErrors.api}</div>
               )}
+
+              <div className={styles.formGroup}>
+                <label htmlFor="username">Username участника *</label>
+                <input
+                  type="username"
+                  id="username"
+                  name="username"
+                  value={newUserData.username}
+                  onChange={handleNewUserInputChange}
+                  placeholder="username"
+                  className={addUserErrors.username ? styles.inputError : ""}
+                  disabled={isAddingUser}
+                />
+                {addUserErrors.username && (
+                  <span className={styles.errorText}>
+                    {addUserErrors.username}
+                  </span>
+                )}
+              </div>
 
               <div className={styles.formGroup}>
                 <label htmlFor="userEmail">Email участника *</label>
