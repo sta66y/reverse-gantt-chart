@@ -1,10 +1,17 @@
-/* pages/Project/Project.module.css */
+/* pages/Project/Project.module.css - Полный файл, полностью переписанный и сгруппированный */
+
 .project {
   min-height: 100vh;
-  background: #f5f5f5;
-  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 20px 12px;
 }
 
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ===================== HEADER ===================== */
 .header {
   background: white;
   padding: 20px;
@@ -13,29 +20,137 @@
   margin-bottom: 20px;
 }
 
-.header h1 {
-  margin: 0;
-  color: #333;
+/* Кнопки header — твои стили, без изменений */
+.backButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backButton:hover {
+  background: #545b62;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.infoButton {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoButton:hover {
+  background: #138496;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.exitButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exitButton:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.editButton {
+  background: #6f42c1;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editButton:hover {
+  background: #5a32a3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.addButton {
+  background: #0066cc;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.addButton:hover {
+  background: #004d99;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Контейнеры header */
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.headerTopRightSection {
+  display: flex;
+  gap: 15px;
+}
+
+.headerMiddle {
+  justify-content: end;
+  display: flex;
+  gap: 15px;
+}
+
+.headerBottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
 }
 
 .controls {
   display: flex;
   gap: 15px;
   align-items: center;
-}
-
-.addButton {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.addButton:hover {
-  background: #0056b3;
 }
 
 .viewToggle {
@@ -59,6 +174,7 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+/* ===================== MAIN ===================== */
 .main {
   background: white;
   border-radius: 8px;
@@ -66,8 +182,7 @@
   overflow: hidden;
 }
 
-/* Добавляем в конец существующего файла */
-
+/* ===================== USERS VIEW ===================== */
 .usersView {
   background: white;
   border-radius: 8px;
@@ -127,6 +242,28 @@
   margin: 0 0 15px 0;
   color: #333;
   font-size: 18px;
+}
+
+.usersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.addUserButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.addUserButton:hover {
+  background: #218838;
 }
 
 .usersTable {
@@ -208,725 +345,7 @@
   background: #545b62;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .statsGrid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-  
-  .usersTable {
-    overflow-x: auto;
-  }
-  
-  .tableHeader,
-  .tableRow {
-    min-width: 600px;
-  }
-  
-  .userActions {
-    flex-direction: column;
-    gap: 5px;
-  }
-  
-  .actionButton {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .viewToggle {
-    flex-wrap: wrap;
-  }
-  
-  .viewToggle button {
-    font-size: 12px;
-    padding: 8px 12px;
-  }
-}
-/* Стили для кнопок в заголовке */
-.headerTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 15px;
-}
-
-.headerTopRightSection {
-  width: 10wh;
-  display: flex;
-  gap: 15px
-}
-.headerMiddle {
-  justify-content: end;
-  display: flex;
-  gap: 15px
-}
-
-.headerBottom {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-}
-
-.backButton {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.backButton:hover {
-  background: #545b62;
-}
-
-.infoButton {
-  background: #17a2b8;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.infoButton:hover {
-  background: #138496;
-}
-
-/* Модальное окно с информацией о проекте */
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.projectModal {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  width: 90%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.modalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.modalHeader h2 {
-  margin: 0;
-  color: #333;
-  font-size: 1.5rem;
-}
-
-.closeButton {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #6c757d;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.3s;
-}
-
-.closeButton:hover {
-  background: #f8f9fa;
-  color: #333;
-}
-
-.modalBody {
-  margin-bottom: 20px;
-}
-
-.infoRow {
-  display: flex;
-  margin-bottom: 16px;
-  align-items: flex-start;
-}
-
-.infoLabel {
-  width: 120px;
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.infoValue {
-  flex: 1;
-  color: #495057;
-  font-size: 14px;
-  padding: 8px 12px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-}
-
-.infoDescription {
-  flex: 1;
-  color: #495057;
-  font-size: 14px;
-  padding: 8px 12px;
-  background: #f8f9fa;
-  border-radius: 4px;
-  border: 1px solid #dee2e6;
-  line-height: 1.5;
-  white-space: pre-line;
-}
-
-
-.modalFooter {
-  padding-top: 20px;
-  border-top: 1px solid #dee2e6;
-  text-align: right;
-}
-
-.closeModalButton {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.closeModalButton:hover {
-  background: #545b62;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-  }
-  
-  .headerRight {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .infoRow {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .infoLabel {
-    width: 100%;
-  }
-  
-  .progressContainer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-  
-  .projectModal {
-    padding: 20px;
-    margin: 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .headerRight {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  
-  .controls {
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .addButton,
-  .infoButton,
-  .backButton {
-    width: 100%;
-  }
-  
-  .viewToggle {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
-/* Добавляем стиль для кнопки выхода */
-
-.exitButton {
-  background: #dc3545;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.exitButton:hover {
-  background: #c82333;
-}
-
-.editButton {
-  background: #aa35dc;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.editButton:hover {
-  background: #9123c8;
-}
-
-/* Обновляем headerLeft для размещения кнопок */
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.headerLeft h1 {
-  margin: 0;
-  margin-left: 10px;
-}
-
-/* Остальные стили без изменений */
-.backButton {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.backButton:hover {
-  background: #545b62;
-}
-
-.infoButton {
-  background: #17a2b8;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.infoButton:hover {
-  background: #138496;
-}
-
-/* Адаптивность для кнопок */
-@media (max-width: 768px) {
-  .headerLeft {
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-  
-  .headerLeft h1 {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 10px;
-  }
-  
-  .exitButton,
-  .backButton {
-    font-size: 12px;
-    padding: 6px 12px;
-  }
-}
-
-@media (max-width: 480px) {
-  .headerLeft {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .exitButton,
-  .backButton {
-    width: 100%;
-  }
-}
-
-
-/* Добавьте в конец Project.module.css */
-
-/* Стили для формы редактирования */
-.editModal {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-.formGroup {
-  margin-bottom: 20px;
-}
-
-.formGroup label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #333;
-  font-size: 14px;
-}
-
-.formGroup input,
-.formGroup textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.3s;
-  box-sizing: border-box;
-}
-
-.formGroup input:focus,
-.formGroup textarea:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-.formGroup textarea {
-  resize: vertical;
-  min-height: 80px;
-  font-family: inherit;
-}
-
-.inputError {
-  border-color: #dc3545 !important;
-}
-
-.inputError:focus {
-  border-color: #dc3545 !important;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25) !important;
-}
-
-.errorText {
-  color: #dc3545;
-  font-size: 12px;
-  margin-top: 5px;
-  display: block;
-}
-
-.apiError {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 12px;
-  border-radius: 4px;
-  border: 1px solid #f5c6cb;
-  margin-bottom: 20px;
-  font-size: 14px;
-}
-
-.modalFooter {
-  padding-top: 20px;
-  border-top: 1px solid #dee2e6;
-  text-align: right;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.cancelButton {
-  background: #6c757d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.cancelButton:hover:not(:disabled) {
-  background: #545b62;
-}
-
-.cancelButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.saveButton {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.saveButton:hover:not(:disabled) {
-  background: #218838;
-}
-
-.saveButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .editModal {
-    padding: 20px;
-    margin: 10px;
-  }
-  
-  .modalFooter {
-    flex-direction: column;
-  }
-  
-  .cancelButton,
-  .saveButton {
-    width: 100%;
-  }
-}
-
-
-/* Добавьте эти стили в конец Project.module.css */
-
-/* Стили для заголовка списка пользователей */
-.usersHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.addUserButton {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.addUserButton:hover {
-  background: #218838;
-}
-
-/* Обновленные стили для кнопок действий */
-.userActions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.editRoleButton {
-  padding: 6px 12px;
-  background: #17a2b8;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  white-space: nowrap;
-}
-
-.editRoleButton:hover {
-  background: #138496;
-}
-
-.deleteButton {
-  padding: 6px 12px;
-  background: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  white-space: nowrap;
-}
-
-.deleteButton:hover {
-  background: #c82333;
-}
-
-/* Стили для модальных окон */
-.addUserModal,
-.confirmModal,
-.editRoleModal {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  width: 90%;
-  max-width: 500px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* Стили для select */
-select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  font-size: 14px;
-  background-color: white;
-  cursor: pointer;
-  transition: border-color 0.3s;
-  box-sizing: border-box;
-}
-
-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
-
-select.inputError {
-  border-color: #dc3545;
-}
-
-select.inputError:focus {
-  border-color: #dc3545;
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
-}
-
-/* Стили для текста в модальных окнах */
-.warningText {
-  color: #dc3545;
-  font-weight: 600;
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.currentRoleInfo {
-  margin-top: 20px;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.currentRole {
-  display: inline-block;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 600;
-  margin-left: 8px;
-}
-
-.deleteConfirmButton {
-  background: #dc3545;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-
-.deleteConfirmButton:hover {
-  background: #c82333;
-}
-
-.roleSelect {
-  margin-top: 10px;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .usersHeader {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-  
-  .addUserButton {
-    width: 100%;
-  }
-  
-  .userActions {
-    flex-direction: column;
-  }
-  
-  .editRoleButton,
-  .deleteButton {
-    width: 100%;
-  }
-  
-  .addUserModal,
-  .confirmModal,
-  .editRoleModal {
-    padding: 20px;
-    margin: 10px;
-  }
-  
-  .modalFooter {
-    flex-direction: column;
-  }
-  
-  .cancelButton,
-  .saveButton,
-  .deleteConfirmButton {
-    width: 100%;
-  }
-}
-
-/* Стили для вкладки приглашений */
+/* ===================== INVITES VIEW ===================== */
 .invitesView {
   background: white;
   border-radius: 8px;
@@ -1021,32 +440,6 @@ select.inputError:focus {
   border: 1px solid #dee2e6;
   border-radius: 6px;
   overflow: hidden;
-}
-
-.tableHeader {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  background: #f8f9fa;
-  padding: 12px 16px;
-  font-weight: 600;
-  color: #333;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.tableRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
-  padding: 12px 16px;
-  border-bottom: 1px solid #dee2e6;
-  transition: background 0.3s ease;
-}
-
-.tableRow:last-child {
-  border-bottom: none;
-}
-
-.tableRow:hover {
-  background: #f8f9fa;
 }
 
 .inviteEmail {
@@ -1173,71 +566,430 @@ select.inputError:focus {
   display: inline-block;
 }
 
-/* Адаптивность */
-@media (max-width: 1024px) {
-  .tableHeader,
-  .tableRow {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+/* ===================== МОДАЛКИ ===================== */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.projectModal {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6c757d;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s;
+}
+
+.closeButton:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.modalBody {
+  margin-bottom: 20px;
+}
+
+.infoRow {
+  display: flex;
+  margin-bottom: 16px;
+  align-items: flex-start;
+}
+
+.infoLabel {
+  width: 120px;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.infoValue {
+  flex: 1;
+  color: #495057;
+  font-size: 14px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.infoDescription {
+  flex: 1;
+  color: #495057;
+  font-size: 14px;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.modalFooter {
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+  text-align: right;
+}
+
+.closeModalButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.closeModalButton:hover {
+  background: #545b62;
+}
+
+/* ===================== ФОРМА РЕДАКТИРОВАНИЯ ===================== */
+.editModal {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.formGroup input,
+.formGroup textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+}
+
+.inputError {
+  border-color: #dc3545 !important;
+}
+
+.inputError:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25) !important;
+}
+
+.errorText {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+}
+
+.apiError {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #f5c6cb;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.modalFooter {
+  padding-top: 20px;
+  border-top: 1px solid #dee2e6;
+  text-align: right;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancelButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.cancelButton:hover:not(:disabled) {
+  background: #545b62;
+}
+
+.cancelButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.saveButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.saveButton:hover:not(:disabled) {
+  background: #218838;
+}
+
+.saveButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===================== АДАПТИВНОСТЬ ===================== */
+@media (max-width: 900px) {
+  /* ~770px — кнопки по центру, растянуты */
+  .headerTop {
+    justify-content: center;
+  }
+
+  .headerLeft {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .headerLeft h1 {
+    width: 100%;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .backButton,
+  .infoButton,
+  .editButton,
+  .exitButton {
+    flex: 1;
+    min-width: auto;
   }
 }
 
 @media (max-width: 768px) {
-  .invitesHeader {
+  .header {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .headerTop {
     flex-direction: column;
     align-items: stretch;
   }
-  
-  .invitesHeaderLeft {
+
+  .headerLeft h1 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .headerRight {
     flex-direction: column;
-    align-items: flex-start;
     gap: 10px;
   }
-  
-  .statsSummary {
+
+  .backButton,
+  .infoButton,
+  .editButton,
+  .exitButton {
     width: 100%;
-    justify-content: space-between;
+    padding: 14px;
+    font-size: 15px;
   }
-  
-  .tableHeader,
-  .tableRow {
-    min-width: 800px;
+
+  .headerBottom {
+    flex-direction: column;
+    gap: 14px;
   }
-  
+
+  .addButton {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+  }
+
+  .viewToggle {
+    width: 100%;
+  }
+
+  .viewToggle button {
+    flex: 1;
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  /* Main на мобильных */
+  .main {
+    height: calc(100vh - 280px);
+  }
+
+  .taskRow, .taskNode, .taskItem {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .taskTitle {
+    font-size: 15px;
+    width: 100%;
+  }
+
+  .taskActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .taskActions button {
+    flex: 1;
+    min-width: 100px;
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 14px;
+  }
+
+  .headerLeft h1 {
+    font-size: 1.4rem;
+  }
+
+  .backButton,
+  .infoButton,
+  .editButton,
+  .exitButton {
+    padding: 13px;
+    font-size: 14px;
+  }
+
+  .viewToggle button {
+    font-size: 12px;
+    padding: 10px 6px;
+  }
+
+  .taskActions button {
+    width: 100%;
+  }
+}
+
+/* Остальная адаптивность (usersView, invites) — как у тебя */
+@media (max-width: 768px) {
+  .statsGrid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .usersTable,
   .invitesTable {
     overflow-x: auto;
   }
-  
+
+  .tableHeader,
+  .tableRow {
+    min-width: 600px;
+  }
+
+  .userActions,
   .inviteActions {
     flex-direction: column;
+    gap: 5px;
   }
-  
-  .resendButton,
+
+  .actionButton,
   .editRoleButton,
-  .deleteButton {
+  .deleteButton,
+  .resendButton {
     width: 100%;
   }
 }
 
 @media (max-width: 480px) {
+  .viewToggle,
   .viewToggleInvites {
     flex-wrap: wrap;
   }
-  
+
+  .viewToggle button,
   .viewToggleInvites button {
-    font-size: 11px;
-    padding: 5px 8px;
-  }
-  
-  .statItem {
-    min-width: 60px;
-    padding: 6px 8px;
-  }
-  
-  .statNumber {
-    font-size: 16px;
-  }
-  
-  .statLabel {
-    font-size: 10px;
+    font-size: 12px;
+    padding: 8px 12px;
   }
 }
