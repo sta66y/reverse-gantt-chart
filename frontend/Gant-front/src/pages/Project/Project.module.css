@@ -1,8 +1,12 @@
-/* pages/Project/Project.module.css */
 .project {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); /* добавил градиент, как хотел */
   padding: 20px;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .header {
@@ -25,17 +29,23 @@
 }
 
 .addButton {
-  background: #007bff;
+  background: #0066cc; /* синий как в идеале */
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
 }
 
 .addButton:hover {
-  background: #0056b3;
+  background: #004d99;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .viewToggle {
@@ -66,7 +76,7 @@
   overflow: hidden;
 }
 
-/* Добавляем в конец существующего файла */
+/* Всё ниже — твой код без изменений */
 
 .usersView {
   background: white;
@@ -213,21 +223,17 @@
   .statsGrid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
-  
   .usersTable {
     overflow-x: auto;
   }
-  
   .tableHeader,
   .tableRow {
     min-width: 600px;
   }
-  
   .userActions {
     flex-direction: column;
     gap: 5px;
   }
-  
   .actionButton {
     width: 100%;
   }
@@ -237,13 +243,13 @@
   .viewToggle {
     flex-wrap: wrap;
   }
-  
   .viewToggle button {
     font-size: 12px;
     padding: 8px 12px;
   }
 }
-/* Стили для кнопок в заголовке */
+
+/* Стили для кнопок в заголовке — только эти подправлены */
 .headerTop {
   display: flex;
   justify-content: space-between;
@@ -251,11 +257,93 @@
   gap: 15px;
 }
 
+.backButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.backButton:hover {
+  background: #545b62;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.infoButton {
+  background: #17a2b8;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.infoButton:hover {
+  background: #138496;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.exitButton {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exitButton:hover {
+  background: #c82333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.editButton {
+  background: #6f42c1;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editButton:hover {
+  background: #5a32a3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Всё остальное — без изменений, включая дубли и адаптивность */
 .headerTopRightSection {
   width: 10wh;
   display: flex;
   gap: 15px
 }
+
 .headerMiddle {
   justify-content: end;
   display: flex;
