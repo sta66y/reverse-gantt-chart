@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styles from "./TaskModal.module.css";
 
-const TaskModal = ({ task, onSave, onClose }) => {
+const TaskModal = ({ task, onSave, onClose, projectDeadline}) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -79,12 +79,16 @@ const TaskModal = ({ task, onSave, onClose }) => {
       const start = new Date(formData.startDate);
       const end = new Date(formData.endDate);
       const current = new Date();
+      const projectDeadlineDate = new Date(projectDeadline);
 
       if (end < start) {
         newErrors.endDate = "Дата окончания не может быть раньше даты начала";
       }
       else if (start < current) {
         newErrors.startDate = "Дата начала не может быть раньше текущей"
+      }
+      else if(projectDeadlineDate < end) {
+        newErrors.endDate = "Дата окончания не может быть позже дедлайна проекта"
       }
     }
 

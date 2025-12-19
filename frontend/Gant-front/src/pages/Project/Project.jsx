@@ -1736,6 +1736,7 @@ const Project = () => {
             setIsModalOpen(false);
             setSelectedTask(null);
           }}
+          projectDeadline={projectDeadline}
         />
       )}
       {/* Модальное окно добавления пользователя */}
