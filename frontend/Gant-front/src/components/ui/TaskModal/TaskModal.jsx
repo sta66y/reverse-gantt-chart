@@ -78,9 +78,13 @@ const TaskModal = ({ task, onSave, onClose }) => {
     if (formData.startDate && formData.endDate) {
       const start = new Date(formData.startDate);
       const end = new Date(formData.endDate);
+      const current = new Date();
 
       if (end < start) {
         newErrors.endDate = "Дата окончания не может быть раньше даты начала";
+      }
+      else if (start < current) {
+        newErrors.startDate = "Дата начала не может быть раньше текущей"
       }
     }
 
@@ -186,10 +190,10 @@ const TaskModal = ({ task, onSave, onClose }) => {
                 value={formData.startTime}
                 onChange={handleChange}
                 required
-                className={errors.startDate ? styles.error : ""}
+                className={errors.startTime ? styles.error : ""}
               />
-              {errors.startDate && (
-                <span className={styles.errorText}>{errors.startDate}</span>
+              {errors.startTime && (
+                <span className={styles.errorText}>{errors.startTime}</span>
               )}
             </div>
 
@@ -201,10 +205,10 @@ const TaskModal = ({ task, onSave, onClose }) => {
                 value={formData.endTime}
                 onChange={handleChange}
                 required
-                className={errors.endDate ? styles.error : ""}
+                className={errors.endTime ? styles.error : ""}
               />
-              {errors.endDate && (
-                <span className={styles.errorText}>{errors.endDate}</span>
+              {errors.endTime && (
+                <span className={styles.errorText}>{errors.endTime}</span>
               )}
             </div>
           </div>

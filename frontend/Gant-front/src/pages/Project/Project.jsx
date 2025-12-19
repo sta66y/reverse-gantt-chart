@@ -132,8 +132,19 @@ const Project = () => {
       setProjectCreatedDate(data.createdAt);
       setProjectUpdatedDate(data.updatedAt);
       setProjectOwnerEmail(data.projectOwnerEmail);
+    }else if (response.status == 403) {
+      setProjectName("unknown");
+      showError({
+        message: "Получение названия запрещено",
+        code: response.status
+      })
+      
     } else {
       setProjectName("unknown");
+      showError({
+        message: "Не удалось получить название проекта",
+        code: response.status
+      })
       console.log("Не удалось получить название проекта");
     }
   };
@@ -149,6 +160,11 @@ const Project = () => {
 
     if (response.ok) {
       console.log("Текущий проект успешно удален");
+    } else if (response.status == 403) {
+      showError({
+        message: "Вы не обладаете правами на удаление проекта!",
+        code: response.status,
+      });
     } else {
       console.log("Не удалось удалить проект");
       showError({
@@ -174,7 +190,16 @@ const Project = () => {
         const data = await response.json();
         console.log("Получены приглашения:", data);
         setInvites(data);
+      } else if (response.status == 403) {
+        // showError({
+        //   message: "Получение приглашений запрещено",
+        //   code: response.status,
+        // });
       } else {
+        showError({
+          message: "Не удалось получить приглашения",
+          code: response.status,
+        });
         console.log("Не удалось получить приглашения");
       }
     } catch (err) {
@@ -204,7 +229,7 @@ const Project = () => {
       } else {
         const errorData = await response.json();
         showError({
-          message: errorData.message || "Ошибка повторной отправки",
+          message: "Ошибка повторной отправки",
           code: response.status,
         });
       }
@@ -235,7 +260,7 @@ const Project = () => {
       } else {
         const errorData = await response.json();
         showError({
-          message: errorData.message || "Ошибка изменения роли",
+          message: "Ошибка изменения роли",
           code: response.status,
         });
       }
@@ -266,10 +291,16 @@ const Project = () => {
 
       if (response.ok) {
         await getProjectInvites();
+        showSuccess("Приглашение было успешно удалено!")
+      } else if(response.status == 403) {
+        showError({
+          message: "Удаление приглашения запрещено!",
+          code: response.status,
+        });
       } else {
         const errorData = await response.json();
         showError({
-          message: errorData.message || "Ошибка удаления приглашения",
+          message: "Ошибка удаления приглашения",
           code: response.status,
         });
       }
@@ -321,10 +352,15 @@ const Project = () => {
         // Преобразуем данные API в формат для UI
         const transformedTasks = transformApiTasksToUITasks(data);
         setTasks(transformedTasks);
+      } else if (response.status == 403){
+        showError({
+          message: "Загрузка задач запрещена",
+          code: response.status,
+        });
       } else {
         const errorData = await response.json();
         showError({
-          message: errorData.message || "Не удалось загрузить задачи",
+          message: "Не удалось загрузить задачи",
           code: response.status,
         });
       }
@@ -426,6 +462,10 @@ const Project = () => {
       });
       setProjectUsers(result);
     } else {
+      showError({
+        message: "Не удалось получить пользователей проекта",
+        code: response.status
+      });
       console.log("Не удалось получить пользователей проекта");
     }
   };
@@ -502,6 +542,11 @@ const Project = () => {
           email: "",
           userRole: "ROLE_STUDENT",
         });
+      } else if (response.status == 403) {
+        showError({
+          message: "Добавление пользователя запрещено!",
+          code: response.status 
+        });
       } else {
         const errorData = await response.json();
         setAddUserErrors({
@@ -550,6 +595,11 @@ const Project = () => {
       if (response.ok) {
         // Обновляем список пользователей
         await getProjectUsers();
+      } else if(response.status == 403) {
+        showError?.({
+          message: "Удаление пользователя запрещено!",
+          code: response.status,
+        });
       } else {
         const errorData = await response.json();
         showError?.({
@@ -607,6 +657,11 @@ const Project = () => {
       if (response.ok) {
         // Обновляем список пользователей
         await getProjectUsers();
+      } else if(response.status == 403) {
+        showError?.({
+          message: "Изменение роли запрещено!",
+          code: response.status,
+        });
       } else {
         const errorData = await response.json();
         showError?.({
@@ -712,13 +767,18 @@ const Project = () => {
         // Закрываем модальное окно
         setIsEditModalOpen(false);
         setEditErrors({});
+      } else if(response.status == 403) {
+        showError?.({
+          message: "Редактирование проекта запрещено!",
+          code: response.status,
+        });
       } else {
         const errorData = await response.json();
         setEditErrors({
-          api: errorData.message || "Ошибка обновления проекта",
+          api: "Ошибка обновления проекта",
         });
         showError?.({
-          message: errorData.message || "Ошибка обновления проекта",
+          message: "Ошибка обновления проекта",
           code: response.status,
         });
       }
@@ -810,7 +870,7 @@ const Project = () => {
       } else {
         const errorData = await response.json();
         showError?.({
-          message: errorData.message || "Ошибка добавления комментария",
+          message: "Ошибка добавления комментария",
           code: response.status,
         });
       }
@@ -852,10 +912,15 @@ const Project = () => {
         if (response.ok) {
           // НЕ обновляем локально, а перезагружаем с сервера
           await getProjectTasks(); // Это ключевое!
+        } else if(response.status == 403) {
+          showError?.({
+            message: "Обновление задачи запрещено!",
+            code: response.status,
+          });
         } else {
           const errorData = await response.json();
           showError({
-            message: errorData.message || "Ошибка обновления задачи",
+            message: "Ошибка обновления задачи",
             code: response.status,
           });
         }
@@ -882,10 +947,15 @@ const Project = () => {
         if (response.ok) {
           // Перезагружаем задачи с сервера
           await getProjectTasks(); // Это ключевое!
+        } else if(response.status == 403) {
+          showError?.({
+            message: "Создание задачи запрещено!",
+            code: response.status,
+          });
         } else {
           const errorData = await response.json();
           showError({
-            message: errorData.message || "Ошибка создания задачи",
+            message: "Ошибка создания задачи",
             code: response.status,
           });
         }
@@ -917,9 +987,14 @@ const Project = () => {
     );
     if (response.ok) {
       setTasks((prev) => deleteTaskFromTree(prev, taskId));
+    } else if(response.status == 403) {
+      showError?.({
+        message: "Удаление задачи запрещено",
+        code: response.status,
+      });
     } else {
       showError({
-        message: "Не удалось удалить таску",
+        message: "Не удалось удалить задачу",
         code: response.status,
       });
     }

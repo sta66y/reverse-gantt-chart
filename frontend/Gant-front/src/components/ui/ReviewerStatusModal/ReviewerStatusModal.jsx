@@ -1,10 +1,13 @@
 // components/ui/ReviewerStatusModal/ReviewerStatusModal.jsx
 import React, { useState } from 'react';
 import styles from './ReviewerStatusModal.module.css';
+import { useNotification } from "../../../contexts/NotificationContext";
 
 const ReviewerStatusModal = ({ task, onClose, onStatusChange, apiAddress, projectId }) => {
   const [selectedStatus, setSelectedStatus] = useState(task?.reviewerStatus || 'None');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { showError } = useNotification();
 
   const statusOptions = [
     { value: 'None', label: 'Не проверялась', icon: '👁️', color: '#6c757d' },
@@ -32,12 +35,23 @@ const ReviewerStatusModal = ({ task, onClose, onStatusChange, apiAddress, projec
         const result = await response.json();
         onStatusChange(result);
         onClose();
+      } else if(response.status == 403) {
+        showError({
+          message: "Изменение статуса проверки запрещено!",
+          code: response.status
+        })
       } else {
         const errorData = await response.json();
-        alert(errorData.message || 'Ошибка изменения статуса проверки');
+        showError({
+          message: 'Ошибка изменения статуса проверки',
+          code: response.status
+        })
       }
     } catch (err) {
-      alert('Ошибка соединения');
+      showError({
+          message: 'Ошибка сети',
+          code: "NETWORK_ERROR"
+        })
       console.error(err);
     } finally {
       setIsSubmitting(false);
