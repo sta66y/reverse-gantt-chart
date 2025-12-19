@@ -609,3 +609,67 @@
   opacity: 0.8;
   transform: scale(1.05);
 }
+
+/* Добавьте эти стили в GanttChart.module.css */
+
+/* Стиль для дедлайна проекта */
+.dateCell.projectDeadline {
+  background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+  border: 2px solid #ff9800 !important;
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+  font-weight: bold;
+}
+
+.dateCell.projectDeadline .dayNumber {
+  color: #000;
+  font-weight: 800;
+}
+
+.dateCell.projectDeadline .monthName {
+  color: #000;
+  font-weight: 600;
+}
+
+/* Индикатор дедлайна */
+.deadlineIndicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Стиль для сегодняшней даты */
+.dateCell.today {
+  background: #e3f2fd !important;
+  border: 1px solid #2196f3 !important;
+}
+
+.todayIndicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  background: #2196f3;
+  border-radius: 50%;
+}
+
+/* Для дедлайна проекта, который также выходной */
+.dateCell.projectDeadline.weekend {
+  background: linear-gradient(135deg, #ffd700, #ffa726) !important;
+  border-color: #ff9800 !important;
+}
+
+/* Для дедлайна проекта, который также первый день месяца */
+.dateCell.projectDeadline.firstOfMonth {
+  background: linear-gradient(135deg, #ffd700, #ffa726) !important;
+  border-left: 3px solid #ff9800 !important;
+}

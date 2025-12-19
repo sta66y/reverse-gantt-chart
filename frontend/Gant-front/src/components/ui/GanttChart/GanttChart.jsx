@@ -11,7 +11,8 @@ const GanttChart = ({
   onAddSubtask,
   onDeleteTask,
   onShowComments,
-  onTaskAssign
+  onTaskAssign,
+  projectDeadline
 }) => {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [expandedTasks, setExpandedTasks] = useState(new Set());
@@ -45,6 +46,14 @@ const GanttChart = ({
     return { minDate, maxDate, days };
   }, [tasks]);
 
+  const projectDeadlineDate = projectDeadline ? new Date(projectDeadline) : null;
+  const isProjectDeadlineInRange = projectDeadlineDate && 
+    projectDeadlineDate >= minDate && 
+    projectDeadlineDate <= maxDate;
+
+  const projectDeadlineOffset = isProjectDeadlineInRange ? 
+    getDayOffset(projectDeadlineDate, minDate) : -1;
+
   // Отрисовка дат
   const renderDatesRow = () => {
     return (
@@ -61,18 +70,29 @@ const GanttChart = ({
             const date = addDays(minDate, i);
             const isWeekend = date.getDay() === 0 || date.getDay() === 6;
             const isFirstOfMonth = date.getDate() === 1;
+            const isProjectDeadline = i === projectDeadlineOffset;
+            const isToday = isSameDay(date, new Date());
 
             return (
               <div
                 key={i}
                 className={`${styles.dateCell} ${
                   isWeekend ? styles.weekend : ""
-                } ${isFirstOfMonth ? styles.firstOfMonth : ""}`}
+                } ${isFirstOfMonth ? styles.firstOfMonth : ""}
+                ${isProjectDeadline ? styles.projectDeadline : ""}
+                ${isToday ? styles.today : ""}`}
                 style={{ width: `${DAY_WIDTH}px` }}
+                title={isProjectDeadline ? `Дедлайн проекта: ${formatDateForTooltip(date)}` : ""}
               >
                 <div className={styles.dayNumber}>{date.getDate()}</div>
                 {isFirstOfMonth && (
                   <div className={styles.monthName}>{getMonthName(date)}</div>
+                )}
+                {isProjectDeadline && (
+                  <div className={styles.deadlineIndicator} title="Дедлайн проекта">⚠️</div>
+                )}
+                {isToday && !isProjectDeadline && (
+                  <div className={styles.todayIndicator} title="Сегодня"></div>
                 )}
               </div>
             );
@@ -329,6 +349,20 @@ const GanttChart = ({
   );
 };
 
+const formatDateForTooltip = (date) => {
+  return date.toLocaleDateString('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+};
+
+const isSameDay = (date1, date2) => {
+  return date1.getDate() === date2.getDate() &&
+         date1.getMonth() === date2.getMonth() &&
+         date1.getFullYear() === date2.getFullYear();
+};
+
 // Вспомогательные функции для статусов
 const getStatusText = (status) => {
   const statusMap = {
@@ -367,7 +401,11 @@ const getAllDates = (tasks) => {
 };
 
 const getDayOffset = (date, startDate) => {
-  return Math.floor((date - startDate) / (1000 * 60 * 60 * 24));
+  // Нормализуем обе даты (убираем время)
+  const dateNormalized = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const startDateNormalized = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+  
+  return Math.floor((dateNormalized - startDateNormalized) / (1000 * 60 * 60 * 24));
 };
 
 const addDays = (date, days) => {

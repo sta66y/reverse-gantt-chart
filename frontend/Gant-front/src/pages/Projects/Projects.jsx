@@ -99,6 +99,10 @@ const Projects = () => {
     if(!newProjectData.projectDescription.trim()) {
       errors.projectDescription = 'Описание обязательно'
     }
+
+    if(!newProjectData.deadline) {
+      errors.deadline = "Дедлайн обязателен"
+    }
     
     if (newProjectData.deadline) {
       const deadlineDate = new Date(newProjectData.deadline);
@@ -291,7 +295,7 @@ const Projects = () => {
               </div>
               
               <div className={styles.formGroup}>
-                <label htmlFor="projectDeadline">Дедлайн (необязательно)</label>
+                <label htmlFor="projectDeadline">Дедлайн</label>
                 <input
                   type="date"
                   id="projectDeadline"

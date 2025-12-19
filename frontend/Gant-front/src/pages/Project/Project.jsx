@@ -1176,6 +1176,7 @@ const Project = () => {
             onTaskStatusChange={handleTaskStatusChange}
             onReviewerStatusChange={handleReviewerStatusChange}
             onTaskAssign={handleTaskAssign}
+            projectDeadline={projectDeadline}
           />
         ) : viewMode === "tree" ? (
           <TaskTree
