@@ -811,13 +811,147 @@
 }
 
 /* ===================== АДАПТИВНОСТЬ ===================== */
-@media (max-width: 1024px) {
-  .tableHeader,
-  .tableRow {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1.5fr;
+@media (max-width: 900px) {
+  /* ~770px — кнопки по центру, растянуты */
+  .headerTop {
+    justify-content: center;
+  }
+
+  .headerLeft {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .headerLeft h1 {
+    width: 100%;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .headerRight {
+    width: 100%;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .backButton,
+  .infoButton,
+  .editButton,
+  .exitButton {
+    flex: 1;
+    min-width: auto;
   }
 }
 
+@media (max-width: 768px) {
+  .header {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .headerTop {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .headerLeft h1 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+
+  .headerRight {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .backButton,
+  .infoButton,
+  .editButton,
+  .exitButton {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .headerBottom {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .addButton {
+    width: 100%;
+    padding: 16px;
+    font-size: 16px;
+  }
+
+  .viewToggle {
+    width: 100%;
+  }
+
+  .viewToggle button {
+    flex: 1;
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  /* Main на мобильных */
+  .main {
+    height: calc(100vh - 280px);
+  }
+
+  .taskRow, .taskNode, .taskItem {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .taskTitle {
+    font-size: 15px;
+    width: 100%;
+  }
+
+  .taskActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .taskActions button {
+    flex: 1;
+    min-width: 100px;
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 14px;
+  }
+
+  .headerLeft h1 {
+    font-size: 1.4rem;
+  }
+
+  .backButton,
+  .infoButton,
+  .editButton,
+  .exitButton {
+    padding: 13px;
+    font-size: 14px;
+  }
+
+  .viewToggle button {
+    font-size: 12px;
+    padding: 10px 6px;
+  }
+
+  .taskActions button {
+    width: 100%;
+  }
+}
+
+/* Остальная адаптивность (usersView, invites) — как у тебя */
 @media (max-width: 768px) {
   .statsGrid {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -845,36 +979,6 @@
   .resendButton {
     width: 100%;
   }
-
-  .usersHeader,
-  .invitesHeader {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .addUserButton {
-    width: 100%;
-  }
-
-  .projectModal,
-  .editModal,
-  .addUserModal,
-  .confirmModal,
-  .editRoleModal {
-    padding: 20px;
-    margin: 10px;
-  }
-
-  .modalFooter {
-    flex-direction: column;
-  }
-
-  .cancelButton,
-  .saveButton,
-  .deleteConfirmButton {
-    width: 100%;
-  }
 }
 
 @media (max-width: 480px) {
@@ -887,18 +991,5 @@
   .viewToggleInvites button {
     font-size: 12px;
     padding: 8px 12px;
-  }
-
-  .statItem {
-    min-width: 60px;
-    padding: 6px 8px;
-  }
-
-  .statNumber {
-    font-size: 16px;
-  }
-
-  .statLabel {
-    font-size: 10px;
   }
 }
