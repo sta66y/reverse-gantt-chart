@@ -19,6 +19,7 @@
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .modalHeader {
@@ -75,6 +76,7 @@
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
 .formGroup textarea {
@@ -85,10 +87,16 @@
 .row {
   display: flex;
   gap: 15px;
+  flex-wrap: wrap;
+  /* margin: 0 -7.5px; */
 }
 
 .row .formGroup {
   flex: 1;
+  /* Добавить отступы для корректной работы с gap */
+  padding: 0 7.5px;
+  /* Убедиться что ширина рассчитывается правильно */
+  min-width: 0; /* Важно для предотвращения переполнения */
 }
 
 .buttons {

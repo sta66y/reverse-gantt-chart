@@ -295,7 +295,7 @@ const Projects = () => {
               </div>
               
               <div className={styles.formGroup}>
-                <label htmlFor="projectDeadline">Дедлайн</label>
+                <label htmlFor="projectDeadline">Дедлайн *</label>
                 <input
                   type="date"
                   id="projectDeadline"

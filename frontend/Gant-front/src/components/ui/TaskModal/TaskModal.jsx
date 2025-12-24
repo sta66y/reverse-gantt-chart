@@ -222,7 +222,7 @@ const TaskModal = ({ task, onSave, onClose, projectDeadline}) => {
               Отмена
             </button>
             <button type="submit" className={styles.save}>
-              deadline Сохранить
+              Сохранить
             </button>
           </div>
         </form>

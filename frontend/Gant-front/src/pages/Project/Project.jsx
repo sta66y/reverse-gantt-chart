@@ -1612,7 +1612,7 @@ const Project = () => {
 
               <div className={styles.formGroup}>
                 <label htmlFor="editProjectDeadline">
-                  Дедлайн (необязательно)
+                  Дедлайн *
                 </label>
                 <input
                   type="date"
