@@ -76,16 +76,20 @@ const TaskModal = ({ task, onSave, onClose, projectDeadline}) => {
     }
 
     if (formData.startDate && formData.endDate) {
-      const start = new Date(formData.startDate);
-      const end = new Date(formData.endDate);
+      const startTime = formData.startTime;
+      const endTime = formData.endTime;
+
+      const start = new Date(`${formData.startDate}T${startTime}:00`);
+      const end = new Date(`${formData.endDate}T${endTime}:00`);
+      
       const current = new Date();
       const projectDeadlineDate = new Date(projectDeadline);
 
       if (end < start) {
-        newErrors.endDate = "Дата окончания не может быть раньше даты начала";
+        newErrors.endDate = "Дата и время окончания не может быть раньше даты начала";
       }
       else if (start < current) {
-        newErrors.startDate = "Дата начала не может быть раньше текущей"
+        newErrors.startDate = "Дата и время начала не может быть раньше текущей"
       }
       else if(projectDeadlineDate < end) {
         newErrors.endDate = "Дата окончания не может быть позже дедлайна проекта"
