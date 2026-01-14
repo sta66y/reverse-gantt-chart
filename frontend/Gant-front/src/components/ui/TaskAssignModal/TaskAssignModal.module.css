@@ -81,7 +81,6 @@
 .modalBody {
   padding: 24px;
   max-height: calc(85vh - 150px);
-  overflow-y: auto;
 }
 
 .taskInfo {
